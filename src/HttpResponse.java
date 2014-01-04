@@ -27,7 +27,6 @@ public class HttpResponse {
 	private byte[] fileInBytes;
 	private int ContentLength;
 	private String ContentType;
-	private String userName;
 	private static final String CHUNKED = "chunked: yes";
 	private static final String USERMAIL = "usermail";
 	private static final String RESPONSE_CHUNK_HEADER = "transfer-encoding";
@@ -440,13 +439,13 @@ public class HttpResponse {
 			int id = getId();
 			if (id > 0) {
 				Poll poll = pollDB.getPollById((long) id);
-				poll.setRecipientsReplies(userName, answer);;
 				if (poll != null
 						&& poll.getStatus() != Consts.PollStatus.COMPLETED) {
+					poll.setRecipientsReplies(userName, answer);
 					pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, poll.getRecipientsReplies(), (long) id);
 				} else {
 					body = "<html><head><title>poll_reply.html</title></head><body>"
-							+ "The poll is closed<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
+							+ "The poll is not avilable<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
 							+ "</form></body></html>";
 				}
 			}
