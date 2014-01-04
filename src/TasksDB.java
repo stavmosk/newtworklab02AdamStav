@@ -4,14 +4,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-
 public class TasksDB extends DBManager {
-
 
 	String getDbFile() {
 		return "C:\\Users\\stavmosk\\Downloads\\task2.data";
 	}
-	
+
 	public void createDb() throws Exception {
 		Class.forName("org.h2.Driver");
 		connection = DriverManager.getConnection(String.format("jdbc:h2:%s",
@@ -56,13 +54,11 @@ public class TasksDB extends DBManager {
 						.execute(String
 								.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , parsedatetime('%s', '%s'), '%s')",
 										Consts.TASKS_TABLE, task.getUserName(),
-										task.getTitle(),
-										task.getContent(),
+										task.getTitle(), task.getContent(),
 										task.getRecipient(),
 										task.getStatusString(),
 										task.getCreationDateAndTimeString(),
-										Consts.DATE_FORMAT,
-										task.getDueDate()));
+										Consts.DATE_FORMAT, task.getDueDate()));
 
 			}
 		} finally {
@@ -73,7 +69,7 @@ public class TasksDB extends DBManager {
 	}
 
 	public void deleteById(long id) throws SQLException {
-		 deleteById(id, Consts.TASKS_TABLE);
+		deleteById(id, Consts.TASKS_TABLE);
 	}
 
 	public ArrayList<Task> getTasks(String userName) throws SQLException {
@@ -83,8 +79,8 @@ public class TasksDB extends DBManager {
 			ArrayList<Task> results = new ArrayList<>();
 			statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(String.format(
-					"select * from %s where user_name = '%s'", Consts.TASKS_TABLE,
-					userName));
+					"select * from %s where user_name = '%s'",
+					Consts.TASKS_TABLE, userName));
 
 			while (rs.next()) {
 				results.add(new Task(rs.getLong("id"), rs
@@ -102,5 +98,38 @@ public class TasksDB extends DBManager {
 			}
 		}
 
+	}
+
+	public void updateTask(Consts.TaskStatus taskStatus, long id) throws SQLException {
+		String status = taskStatus.name();
+		Statement statement = null;
+		try {
+			statement = connection.createStatement();
+			statement.execute(String.format(
+					"update %s set status='%s' where id=%d",
+					Consts.TASKS_TABLE, status, id));
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
+	}
+
+	public Task getTaskById(long id) throws SQLException {
+		Statement statement = null;
+		try {
+			statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(String.format(
+					"select * from %s where id=%d", Consts.TASKS_TABLE, id));
+			rs.next();
+			return new Task(rs.getLong("id"), rs.getString("user_name"),
+					rs.getString("title"), rs.getString("content"),
+					rs.getNString("recipient"), rs.getString("status"),
+					rs.getTimestamp("creation_time"), rs.getString("due_time"));
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
 	}
 }

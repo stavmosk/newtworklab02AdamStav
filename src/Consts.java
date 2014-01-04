@@ -12,6 +12,11 @@ public class Consts {
 	public static final String REMINDERS_PAGE = "reminders.html";
 	public static final String TASKS_PAGE = "tasks.html";
 	public static final String POLLS_PAGE = "polls.html";
+	
+	public static final String TASK_REPLY = "task_reply.html";
+	public static final String POLL_REPLY = "poll_reply.html";
+
+
 
 	public static final String REMINDERS_EDITOR = "reminder_editor.html";
 	public static final String TASK_EDITOR = "task_editor.html";

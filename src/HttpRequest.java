@@ -111,6 +111,7 @@ public class HttpRequest {
 				validateReminder();
 			} catch (SQLException e) {
 				System.err.println("The reminder isnt valid");
+				httpResponseCode = httpResponseCode.BAD;
 			}
 		}
 
@@ -119,6 +120,8 @@ public class HttpRequest {
 				validateTask();
 			} catch (SQLException e) {
 				System.err.println("The task isnt valid");
+				httpResponseCode = httpResponseCode.BAD;
+
 			}
 		}
 
@@ -127,6 +130,19 @@ public class HttpRequest {
 				validatePoll();
 			} catch (SQLException e) {
 				System.err.println("The poll isnt valid");
+				httpResponseCode = httpResponseCode.BAD;
+
+			}
+		}
+
+		if (parser.getPath().equals("/" + Consts.TASK_REPLY)) {
+			try {
+				updateTask();
+			} catch (SQLException e) {
+				System.err.println("Cant update the task");
+				httpResponseCode = httpResponseCode.BAD;
+
+
 			}
 		}
 		
@@ -286,5 +302,26 @@ public class HttpRequest {
 
 	public void setPollDB(PollDB pollDB) {
 		this.pollDB = pollDB;
+	}
+
+	public void updateTask() throws SQLException {
+
+		if (parser.getParams().containsKey("id")) {
+			int id = getId();
+			if (id > 0) {
+				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
+			}
+		}
+
+	}
+
+	private int getId() {
+		String idString = parser.getParam("id");
+		try {
+			return Integer.parseInt(idString);
+		} catch (NumberFormatException e) {
+			System.out.println("not a number");
+			return -1;
+		}
 	}
 }
