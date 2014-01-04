@@ -1,12 +1,9 @@
 import java.util.Date;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Map;
 
-public abstract class job {
+public abstract class Job {
 
 	private String title;
 	private String content;
@@ -15,20 +12,20 @@ public abstract class job {
 	private Boolean valid;
 	private Long id;
 
-	public job(Map<String, String> params, String userName) {
+	public Job(Map<String, String> params, String userName) {
 		if (params != null || !(params.isEmpty())) {
 			this.valid = true;
 			setId(params.get("id"));
 			creationDateAndTime = new Date();
 			setTitle(params.get(Consts.TITLE.toLowerCase()));
 			setUserName(userName);
-			setContent(params.get(Consts.CONETNT.toLowerCase()));
+			setContent(params.get(Consts.CONTENT.toLowerCase()));
 		} else {
 			this.valid = false;
 		}
 	}
 
-	public job(long id, String userName, String title, String content,
+	public Job(long id, String userName, String title, String content,
 			Date creationDateAndTime) {
 		super();
 		this.title = title;

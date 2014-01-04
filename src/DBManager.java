@@ -5,6 +5,11 @@ public class DBManager {
     final int TABLE_EXISTS_ERROR_CODE = 42101;
     protected final Object lock = new Object();
     protected Connection connection;
+    protected String path;
+    
+    public DBManager(String path) { 
+    	this.path = path;
+    }
 
     protected void deleteById(long id, String tableName) throws SQLException {
         Statement statement = null;

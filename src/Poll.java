@@ -6,7 +6,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 
-public class Poll extends job {
+public class Poll extends Job {
 
 
 	private LinkedList<String> recipients;
@@ -39,6 +39,10 @@ public class Poll extends job {
 		setRecipientsReplies(recipientsReplies);
 		setStatus(status);
 	}
+	
+	public LinkedList<String> getRecipientsAsList() { 
+		return recipients;
+	}
 
 	public String getRecipients() {
 		if (recipients != null && !recipients.isEmpty()) {
@@ -65,6 +69,10 @@ public class Poll extends job {
 				this.recipients.add(receptientsArray[i]);
 			}
 		}
+	}
+	
+	public LinkedList<String> getAnswersAsList() { 
+		return answers;
 	}
 
 	public String getAnswers() {
@@ -93,6 +101,10 @@ public class Poll extends job {
 				this.answers.add(answersArray[i]);
 			}
 		}
+	}
+	
+	public Map<String,String> getRecipientsRepliesAsMap() {
+	return recipientsReplies;
 	}
 
 	public String getRecipientsReplies() {

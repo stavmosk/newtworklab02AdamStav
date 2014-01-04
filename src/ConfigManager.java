@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Mannage the Config File.
+ * Manage the Config File.
  * 
  * @author stavmosk
  *
@@ -14,7 +14,7 @@ public class ConfigManager {
 	private Map<String, String> configMap;
 
 	/**
-	 * A configuration mannager. 
+	 * A configuration manager. 
 	 * Accept a file with root, port, default page and max number of threads.
 	 */
 	public ConfigManager() throws Exception {
@@ -49,13 +49,14 @@ public class ConfigManager {
 					configMap.put(keyAndValue[0].trim(), "");
 				}
 			}
-
+			
 			reader.close();
-
+			buffer.close();
 		}
 		catch (Exception e) {
 			throw e;
 		}
+		
 	}
 
 	/**

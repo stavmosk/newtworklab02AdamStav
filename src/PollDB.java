@@ -6,8 +6,13 @@ import java.util.ArrayList;
 
 public class PollDB extends DBManager {
 
+	public PollDB(String path) {
+		super(path);
+	}
+
 	String getDbFile() {
-		return "C:\\Users\\stavmosk\\Downloads\\poll3.data";
+		//return "C:\\Users\\stavmosk\\Downloads\\poll3.data";
+		return "C:\\Users\\user\\workspaceHTML\\newtworklab02AdamStav\\"+ path;
 	}
 
 	public void createDb() throws Exception {

@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.xml.bind.DatatypeConverter;
+
 public class SMTPclient {
 
 	private final static String CRLF = "\r\n";
@@ -18,7 +20,7 @@ public class SMTPclient {
 	private int smtpPort;
 	private String userName;
 	private String password;
-	private Boolean autoLogin;
+	private Boolean authLogin;
 	
 	Socket smtpSocket = null;
 	DataOutputStream os = null;
@@ -27,7 +29,7 @@ public class SMTPclient {
 
 	public SMTPclient(String userName, String password, String subject,
 			String mailFrom, String rcptTo, String messageData,
-			String smtpName, int smtpPort, Boolean autoLogin) {
+			String smtpName, int smtpPort, Boolean authLogin) {
 		this.userName = userName;
 		this.password = password;
 		this.subject = subject;
@@ -36,7 +38,7 @@ public class SMTPclient {
 		this.messageData = messageData;
 		this.smtpName = smtpName;
 		this.smtpPort = smtpPort;
-		this.autoLogin = autoLogin;
+		this.authLogin = authLogin;
 
 	}
 
@@ -61,8 +63,7 @@ public class SMTPclient {
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host: hostname");
 		} catch (IOException e) {
-			System.err
-					.println("Couldn't get I/O for the connection to: hostname");
+			System.err.println("Couldn't get I/O for the connection to: hostname");
 		}
 	}
 
@@ -74,10 +75,11 @@ public class SMTPclient {
 		String responseLine;
 		try {
 			if ((responseLine = reader.readLine()) != null) {
-				if (responseLine.indexOf("Ok") == -1) {
+				if (responseLine.indexOf("OK") == -1 && responseLine.indexOf("220") == -1) {
 					System.err.println(responseLine);
 					return false;
 				}
+				System.out.println(responseLine);
 			} else {
 				System.err.println("Smtp server isnt responding");
 				return false;
@@ -101,19 +103,25 @@ public class SMTPclient {
 
 			try {
 
-				//
-				if (autoLogin) {
+				if (authLogin) {
 					os.writeBytes("EHLO stavMoskovich adamRozental" + CRLF);
 					if (!checkSmtpServerResponse()) {
 						return;
 					}
+					System.out.println(reader.readLine());
+					System.out.println(reader.readLine());
+					System.out.println(reader.readLine());
+					
 					os.writeBytes("AUTH LOGIN" + CRLF);
+					System.out.println(reader.readLine());
 					// //... 334
-					encodeUserName = Base64Coder.encodeString(userName);
-					encodePassword = Base64Coder.encodeString(password);
+					encodeUserName = DatatypeConverter.printBase64Binary(userName.getBytes());
+					encodePassword = DatatypeConverter.printBase64Binary(password.getBytes());
 					os.writeBytes(encodeUserName + CRLF);
+					System.out.println(reader.readLine());
 					// /... 334
 					os.writeBytes(encodePassword + CRLF);
+					System.out.println(reader.readLine());
 					// /.. 235
 
 				} else {
@@ -124,11 +132,11 @@ public class SMTPclient {
 					}
 				}
 
-				os.writeBytes("MAIL From: " + mailFrom + CRLF);
+				os.writeBytes("MAIL FROM: " + mailFrom + CRLF);
 				if (!checkSmtpServerResponse()) {
 					return;
 				}
-				os.writeBytes("RCPT To: " + rcptTo);
+				os.writeBytes("RCPT TO: " + rcptTo + CRLF);
 				if (!checkSmtpServerResponse()) {
 					return;
 				}
@@ -141,14 +149,11 @@ public class SMTPclient {
 				os.writeBytes("Subject: " + subject + CRLF);
 				os.writeBytes("From: " + fromName + CRLF);
 				// check what should be written after the sender
-				os.writeBytes("sender: " + mailFrom + CRLF);
+				os.writeBytes("Sender: " + mailFrom + CRLF);
 				os.writeBytes(messageData);
 				os.writeBytes(CRLF + "." + CRLF);
 
-				// Closure
-				if (!checkSmtpServerResponse()) {
-					return;
-				}
+				System.out.println(reader.readLine());
 				os.writeBytes("QUIT");
 				os.close();
 				is.close();

@@ -1,11 +1,9 @@
 import java.io.File;
-import java.nio.file.Path;
 import java.sql.SQLException;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.omg.CORBA.VersionSpecHelper;
 
 /**
  * Handle the http request.
@@ -49,6 +47,22 @@ public class HttpRequest {
 	private TasksDB taskDB;
 	private PollDB pollDB;
 
+	public HttpRequest(String request, ConfigManager configM, RemindersDB reminderDB, TasksDB taskDB, PollDB pollDB) { 
+		this.request = request;
+		
+		this.defaultPage = configM.GetValue(Consts.CONFIG_DEFAULTPAGE);
+		this.root = configM.GetValue(Consts.CONFIG_ROOT);
+		this.reminderDB = reminderDB;
+		this.taskDB = taskDB;
+		this.pollDB = pollDB;
+		parser = new HttpParser();
+		httpResponseCode = httpResponseCode.OK;
+
+		if (parseRequest()) {
+			validateRequest();
+		}
+	}
+	
 	/**
 	 * Given a request, parse it using http parser and validate its headers and
 	 * body. Decide the http response code each request gets.
@@ -121,7 +135,6 @@ public class HttpRequest {
 			} catch (SQLException e) {
 				System.err.println("The task isnt valid");
 				httpResponseCode = httpResponseCode.BAD;
-
 			}
 		}
 
@@ -261,9 +274,15 @@ public class HttpRequest {
 				.getCookies().get(Consts.USERMAIL));
 		if (reminder.getValid()) {
 			reminderDB.addOrupdateReminder(reminder);
+			setTimerForReminder(reminder, reminderDB);
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/reminders.html");
 		}
+	}
+	
+	public void setTimerForReminder(Reminder currentReminder, RemindersDB manager ) { 
+		Timer reminderTimer = new Timer();
+		reminderTimer.schedule(new JobTimerTask(currentReminder, manager), currentReminder.getDateRemindingDate());
 	}
 
 	private void validateTask() throws SQLException {
@@ -271,20 +290,56 @@ public class HttpRequest {
 				Consts.USERMAIL));
 		if (task.getValid()) {
 			taskDB.createTask(task);
+			sendMailToTaskRecipient(task);
+			setTimerForTask(task, taskDB);
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/tasks.html");
 		}
+	}
+	
+	private void setTimerForTask(Task currentTask, TasksDB manager ) { 
+		Timer reminderTimer = new Timer();
+		reminderTimer.schedule(new JobTimerTask(currentTask, manager), Consts.convertFromStringToDate(currentTask.getDueDate()));
+	}
+	
+	private void sendMailToTaskRecipient(Task task){
+		String currentContent = task.getContent() + "ServerName\task_reply.html?id=" + task.getId();
+		SMTPclient smtpTaskToRecipient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.TASK_TITLE + task.getTitle(), task.getUserName(), task.getRecipient(), currentContent, "compnet.idc.ac.il", 25, true);
+		smtpTaskToRecipient.sendSmtpMessage();
 	}
 
 	private void validatePoll() throws SQLException {
 
 		Poll poll = new Poll(parser.getParams(), parser.getCookies().get(
 				Consts.USERMAIL));
+		
 		if (poll.getValid()) {
 			pollDB.createPoll(poll);
+			SendMailToPollParticipants(poll);
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/polls.html");
 		}
+	}
+	
+	private void SendMailToPollParticipants(Poll poll) { 
+		LinkedList<String> answers = poll.getAnswersAsList();
+		
+		StringBuilder contentBuilder = new StringBuilder();
+		contentBuilder.append(poll.getContent());
+		contentBuilder.append("\n");
+		
+		SMTPclient currentSmtpClient;
+		LinkedList<String> recipients = poll.getRecipientsAsList();
+		for (String answer : answers) {
+			
+		// need to handle the url right
+		contentBuilder.append(String.format("<a href=\"ServerName/poll_reply.html?id=%d&answer=%s\">%s</a>\n", poll.getId(), answer, answer));
+		}
+		
+		for (String recipient : recipients) {
+			currentSmtpClient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.POLL_TITLE + poll.getTitle(), poll.getUserName(), recipient, contentBuilder.toString(), "compnet.idc.ac.il", 25, true);
+			currentSmtpClient.sendSmtpMessage();
+		}	
 	}
 
 	public PollDB getPollDB() {

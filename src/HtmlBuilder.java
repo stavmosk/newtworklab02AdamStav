@@ -1,7 +1,7 @@
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class HtmlBuilder<T extends job> {
+public class HtmlBuilder<T extends Job> {
 	private String[] remindersTitle = { "Title", "Creation Date",
 			"Reminder Date" };
 	private String[] taskTitle = { "Title", "Creation Date", "task Date",
@@ -124,7 +124,7 @@ public class HtmlBuilder<T extends job> {
 		builder.append(reminder.getCreationDateAndTimeString());
 		builder.append("</td>");
 		builder.append("<td>");
-		builder.append(reminder.getDateRemnidingString());
+		builder.append(reminder.getDateRemindingString());
 		builder.append("</td>");
 		builder.append("<td>");
 		builder.append("<form name=\"Edit\" method=\"GET\" action=\""
@@ -208,8 +208,8 @@ public class HtmlBuilder<T extends job> {
 			id = reminder.getId();
 			subject = reminder.getTitle();
 			content = reminder.getContent();
-			date = reminder.getDateRemnidingString();
-			time = reminder.getDateRemnidingString();
+			date = reminder.getDateRemindingString();
+			time = reminder.getDateRemindingString();
 		}
 		
 		StringBuilder builder = new StringBuilder();
@@ -225,7 +225,7 @@ public class HtmlBuilder<T extends job> {
 
 		builder.append("subject: <input type=\"text\" name=\""+ Consts.TITLE +"\" value=\"" + subject +
 				"\"><br>");
-		builder.append("content: <input type=\"text\" name=\"" + Consts.CONETNT + "\"value=\"" + content +
+		builder.append("content: <input type=\"text\" name=\"" + Consts.CONTENT + "\"value=\"" + content +
 				"\"><br>");
 		builder.append("date: <input type=\"text\" name=\"" + Consts.REMINDING_DATE + "\" value=\"" + date+
 				"\"><br>");
@@ -255,7 +255,7 @@ public class HtmlBuilder<T extends job> {
 		builder.append("<form name=\"TaskEdit\" method=\"POST\" "
 				+ "action=\"submit_task.html\">");
 		builder.append("subject: <input type=\"text\" name=\""+ Consts.TITLE +"\"><br>");
-		builder.append("content: <input type=\"text\" name=\"" + Consts.CONETNT + "\"><br>");
+		builder.append("content: <input type=\"text\" name=\"" + Consts.CONTENT + "\"><br>");
 		builder.append("recipient: <input type=\"text\" name=\"" + Consts.RECIPIENT + "\"><br>");
 		builder.append("date: <input type=\"text\" name=\"" + Consts.DUE_DATE + "\"><br>");
 		builder.append("time: <input type=\"text\" name=\"" + Consts.DUE_TIME + "\"><br>");
@@ -282,7 +282,7 @@ public class HtmlBuilder<T extends job> {
 		builder.append("<form name=\"PollEdit\" method=\"POST\" "
 				+ "action=\"submit_poll.html\">");
 		builder.append("subject: <input type=\"text\" name=\""+ Consts.TITLE +"\"><br>");
-		builder.append("content: <input type=\"text\" name=\"" + Consts.CONETNT + "\"><br>");
+		builder.append("content: <input type=\"text\" name=\"" + Consts.CONTENT + "\"><br>");
 		builder.append("recipients: <input type=\"text\" name=\"" + Consts.RECIPIENTS + "\"><br>");
 		builder.append("answers: <input type=\"text\" name=\"" + Consts.ANSWERS + "\"><br>");
 		builder.append("<input type=\"submit\" value=\"Save\">");

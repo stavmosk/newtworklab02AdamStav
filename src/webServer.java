@@ -1,13 +1,13 @@
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * Parse the config file, and according to its parametres start to listen to the
+ * Parse the config file, and according to its parameters start to listen to the
  * given port. Each connection gets a thread that handle the connection between
  * the server and the client.
  * 
@@ -16,7 +16,6 @@ import java.util.LinkedList;
  */
 public class webServer {
 
-	private static final String CONFIGFILE = "config.ini";
 	private static final String ROOT = "root";
 	private static final String PORT = "port";
 	private static final String MAX_THREADS = "maxThreads";
@@ -30,10 +29,10 @@ public class webServer {
 	private static String defaultPage;
 	private static LinkedList<String> userMailCookies;
 
-	private static void startListening() {
-		TasksDB taskManager = new TasksDB();
-		RemindersDB reminderManager = new RemindersDB();
-		PollDB pollManager = new PollDB();
+	private static void startListening(ConfigManager configM) {
+		TasksDB taskManager = new TasksDB(configM.GetValue(Consts.CONFIG_TASKFILEPATH));
+		RemindersDB reminderManager = new RemindersDB(configM.GetValue(Consts.CONFIG_REMINDERFILE));
+		PollDB pollManager = new PollDB(configM.GetValue(Consts.CONFIG_POLLFILEPATH));
 		try {
 			reminderManager.createDb();
 			taskManager.createDb();
@@ -41,6 +40,27 @@ public class webServer {
 		} catch (Exception e1) {
 			System.out.println("Error initlize Data base.");
 		}
+		
+		// I need to go over all the data bases and create timers for them?
+		/*
+		ArrayList<Reminder> dueTimeReminders = null;
+		try {
+			 dueTimeReminders = reminderManager.getRemindersBeforeCurrentTime();
+		} catch (SQLException e2) {
+			System.err.println("Error loading due time reminders from table");
+		}
+		
+		if (dueTimeReminders != null) { 
+			SMTPclient currentClient = null;
+			for (Reminder reminder : dueTimeReminders) {
+				
+				// need to change this to work with the config
+				currentClient = new SMTPclient(configM.GetValue(Consts.CONFIG_SMTPUSERNAME), configM.GetValue(Consts.CONFIG_SMTPPASSWORD), reminder.getTitle(), reminder.getUserName(), reminder.getUserName(), reminder.getContent(), configM.GetValue(Consts.CONFIG_SMTPNAME), Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)), Boolean.parseBoolean(configM.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
+				currentClient.sendSmtpMessage();
+			}
+		}*/
+		
+		// run on all the current data base and start timers for them
 		
 		System.out.println(STARTING_SERVER);
 		ServerSocket server = null;
@@ -64,8 +84,7 @@ public class webServer {
 				currentClient = server.accept();
 
 				synchronized (list) {
-					list.addLast(new SocketThread(root, defaultPage,
-							currentClient, reminderManager, taskManager, pollManager));
+					list.addLast(new SocketThread(configM, currentClient, reminderManager, taskManager, pollManager));
 					list.notify();
 				}
 			}
@@ -155,19 +174,19 @@ public class webServer {
 		userMailCookies = new LinkedList<String>();
 
 		try {
-			ConfigManager manager = new ConfigManager();
-			root = manager.GetValue(ROOT);
-			defaultPage = manager.GetValue(DEFAULT_PAGE);
+			ConfigManager configM = new ConfigManager();
+			root = configM.GetValue(ROOT);
+			defaultPage = configM.GetValue(DEFAULT_PAGE);
 
 			try {
-				maxThreads = Integer.parseInt(manager.GetValue(MAX_THREADS));
+				maxThreads = Integer.parseInt(configM.GetValue(MAX_THREADS));
 			} catch (Exception e) {
 				System.out.println("config file isnt valid");
 				System.exit(0);
 			}
 
 			try {
-				port = Integer.parseInt(manager.GetValue(PORT));
+				port = Integer.parseInt(configM.GetValue(PORT));
 			} catch (Exception e) {
 				System.out.println("config file isnt valid");
 				System.exit(0);
@@ -179,7 +198,7 @@ public class webServer {
 			}
 
 
-			startListening();
+			startListening(configM);
 
 		} catch (Exception e) {
 			System.out.println("Error while running the server");

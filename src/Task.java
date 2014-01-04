@@ -2,7 +2,7 @@
 import java.util.Date;
 import java.util.Map;
 
-public class Task extends job {
+public class Task extends Job {
 
 	private String dueDate;
 	private Consts.TaskStatus status;

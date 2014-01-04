@@ -21,6 +21,7 @@ public class SocketThread implements Runnable {
 	private RemindersDB remindersDB;
 	private TasksDB taskDB;
 	private PollDB pollDB;
+	private ConfigManager configM;
 
 	public SocketThread(String root, String defaultPage, Socket socket, RemindersDB remindersDB, TasksDB tasksDB, PollDB pollDB) {
 		this.root = root;
@@ -29,6 +30,14 @@ public class SocketThread implements Runnable {
 		this.remindersDB = remindersDB;
 		this.taskDB = tasksDB;
 		this.pollDB = pollDB;
+	}
+	
+	public SocketThread(ConfigManager configM, Socket socket, RemindersDB remindersDB, TasksDB tasksDB, PollDB pollsDB) { 
+		this.configM = configM;
+		this.socket = socket;
+		this.remindersDB = remindersDB;
+		this.taskDB = tasksDB;
+		this.pollDB = pollsDB;
 	}
 
 	/**
@@ -41,7 +50,8 @@ public class SocketThread implements Runnable {
 		try {
 
 			String requestFromClient = getClientRequest();
-			request = new HttpRequest(requestFromClient, defaultPage, root, remindersDB, taskDB, pollDB);
+			//request = new HttpRequest(requestFromClient, defaultPage, root, remindersDB, taskDB, pollDB);
+			request = new HttpRequest(requestFromClient, configM, remindersDB, taskDB, pollDB);
 			response = new HttpResponse(request);
 			sendResponeToClient(response);
 			printResponseHeaders();

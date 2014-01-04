@@ -6,8 +6,13 @@ import java.util.ArrayList;
 
 public class TasksDB extends DBManager {
 
+	public TasksDB(String path) {
+		super(path);
+	}
+
 	String getDbFile() {
-		return "C:\\Users\\stavmosk\\Downloads\\task2.data";
+		//return "C:\\Users\\stavmosk\\Downloads\\task2.data";
+		return "C:\\Users\\user\\workspaceHTML\\newtworklab02AdamStav\\"+ path;
 	}
 
 	public void createDb() throws Exception {

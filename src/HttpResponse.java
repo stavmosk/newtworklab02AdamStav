@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class HttpResponse {
 
@@ -115,29 +113,43 @@ public class HttpResponse {
 					if (query != null && query.contains("id")) {
 						taskDB.deleteById((long) getId());
 					}
-					body = taskHtmlBuilder.buildTable(
-							taskDB.getTasks(userName), path);
+					body = taskHtmlBuilder.buildTable(taskDB.getTasks(userName), path);
 				} else if (path.equals("/" + Consts.TASK_EDITOR)) {
 					body = taskHtmlBuilder
 							.buildTaskEditor(Consts.REMINDERS_EDITOR);
 				} else if (path.equals("/" + Consts.TASK_REPLY)) {
-					updateTask();
-
+					
+					if (params.containsKey("id")) {
+						int id = getId();
+						if (id > 0) { 
+						updateTaskAsCompleted(id);
+						sendMailToTaskCreator(id);
+						}
+					}
+					
 					// Polls
 				} else if (path.equals("/" + Consts.POLLS_PAGE)) {
 					String userName = cookies.get(Consts.USERMAIL);
 					if (query != null && query.contains("id")) {
 						pollDB.deleteById((long) getId());
 					}
-					body = pollHtmlBuilder.buildTable(
-							pollDB.getPolls(userName), path);
+					body = pollHtmlBuilder.buildTable(pollDB.getPolls(userName), path);
 				} else if (path.equals("/" + Consts.POLL_EDITOR)) {
 					body = pollHtmlBuilder.buildPollEditor(Consts.POLL_EDITOR);
 				} else if (path.equals("/" + Consts.POLL_REPLY)) {
-					body = updatePoll();
-
+					
+					if (params.containsKey("id") && params.containsKey("answer")) {
+						String userName = cookies.get(Consts.USERMAIL);
+						String answer = params.get("answer");
+						if (userName != null && answer != null) {
+						int id = getId();
+						if (id > 0) {
+							sendMailToPollCreator(userName, answer, id);
+							body = updatePoll(userName,answer, id);
+						}
+						}
 				}
-
+				}
 				break;
 			case POST:
 				responseFile = new File(root + path);
@@ -394,10 +406,11 @@ public class HttpResponse {
 			while (fis.available() != 0) {
 				fis.read(bFile, 0, bFile.length);
 			}
+			fis.close();
 			return bFile;
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
-		}
+		} 
 		return null;
 	}
 
@@ -428,37 +441,53 @@ public class HttpResponse {
 		return responseHeaders.toString();
 	}
 
-	public String updatePoll() throws SQLException {
-		String body = null;
-		if (params.containsKey("id") && params.containsKey("answer")) {
-			String userName = cookies.get(Consts.USERMAIL);
-			String answer = params.get("answer");
-			if (userName == null || answer == null) {
-				return null;
-			}
-			int id = getId();
-			if (id > 0) {
-				Poll poll = pollDB.getPollById((long) id);
-				if (poll != null
-						&& poll.getStatus() != Consts.PollStatus.COMPLETED) {
-					poll.setRecipientsReplies(userName, answer);
-					pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, poll.getRecipientsReplies(), (long) id);
+	public String updatePoll(String answererUserName, String answer, long id) throws SQLException {
+				String body = null;
+				Poll currentPoll = pollDB.getPollById((long) id);
+				if (currentPoll != null && currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+					currentPoll.setRecipientsReplies(answererUserName, answer);
+					if (currentPoll.getRecipientsRepliesAsMap().size() == currentPoll.getRecipientsAsList().size()) { 
+					pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, currentPoll.getRecipientsReplies(), (long)id);
+					} else { 
+						pollDB.updatePollAnswers(Consts.PollStatus.IN_PROGRESS, currentPoll.getRecipientsReplies(), (long)id);
+					}
 				} else {
 					body = "<html><head><title>poll_reply.html</title></head><body>"
 							+ "The poll is not avilable<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
 							+ "</form></body></html>";
 				}
-			}
-		}
 		return body;
 	}
-
-	public void updateTask() throws SQLException {
-		if (params.containsKey("id")) {
-			int id = getId();
-			if (id > 0) {
-				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
-			}
+	
+	public void sendMailToPollCreator(String answererUserName, String answer, long id) { 
+		Poll currentPoll = null;
+		try {
+			currentPoll = pollDB.getPollById(id);
+		} catch (SQLException e) {
+			System.err.println("Error getting a poll by Id while sending the email to the creator");
 		}
+		
+		// need to change with the config
+		SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentPoll.getTitle() + " answer from " + answererUserName , answererUserName, currentPoll.getUserName(), Consts.POLL_ANSWER_CONTENT + answer, "compnet.idc.ac.il", 25, true);
+		SmtpToCreator.sendSmtpMessage();
+		
+		} 
+	
+	public void sendMailToTaskCreator(int id) { 
+		Task currentTask = null;
+		try {
+			currentTask = taskDB.getTaskById(id);
+		} catch (SQLException e) {
+			System.err.println("Error getting a task by Id while sending the email to the creator");
+		}
+		
+				// need to change with the config
+				SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentTask.getTitle() + " is completed" , currentTask.getUserName(), currentTask.getUserName(), Consts.TASK_COMPLETED, "compnet.idc.ac.il", 25, true);
+				SmtpToCreator.sendSmtpMessage();
+		} 
+	
+
+	public void updateTaskAsCompleted(int id) throws SQLException {
+				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
 	}
 }

@@ -40,7 +40,7 @@ public class Consts {
 	public static final String DUE_TIME = "dueTime";
 
 	public static final String TITLE = "title";
-	public static final String CONETNT = "content";
+	public static final String CONTENT = "content";
 	public static final String STATUS = "status";
 	public static final String REMINDING_DATE = "remindingDate";
 	public static final String REMINDING_TIME = "remindingTime";
@@ -52,6 +52,27 @@ public class Consts {
 	public static final String USERMAIL = "usermail";
 
 	public final static String HDR_COOKIE = "cookie";
+	
+	public final static String TASK_COMPLETED = "The task is completed";
+	public final static String TASK_TIME_IS_DUE = "The tasks' time is due";
+	public final static String TASK_TITLE = "Task: ";
+	
+	public final static String POLL_TITLE = "Poll: ";
+	public final static String POLL_ANSWER_CONTENT = "My answer to your poll is: ";
+	
+	public static final String CONFIG_PORT = "port=8080";
+	public static final String CONFIG_ROOT = "root";
+	public static final String CONFIG_MAXTHREAD = "maxThreads";
+	public static final String CONFIG_DEFAULTPAGE = "defaultPage";
+	public static final String CONFIG_SMTPNAME = "SMTPName";
+	public static final String CONFIG_SMTPPORT = "SMTPPort";
+	public static final String CONFIG_SERVERNAME = "ServerName";
+	public static final String CONFIG_SMTPUSERNAME = "SMTPUsername";
+	public static final String CONFIG_ISAUTHLOGIN = "SMTPIsAuthLogin";
+	public static final String CONFIG_REMINDERFILE = "reminderFilePath";
+	public static final String CONFIG_TASKFILEPATH = "taskFilePath";
+	public static final String CONFIG_POLLFILEPATH = "pollFilePath";
+	public static final String CONFIG_SMTPPASSWORD ="SMTPPassword";
 
 
 	public static Date convertFromStringToDate(String date) {
