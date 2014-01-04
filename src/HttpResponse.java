@@ -75,7 +75,6 @@ public class HttpResponse {
 		HtmlBuilder<Task> taskHtmlBuilder = new HtmlBuilder<Task>();
 		HtmlBuilder<Poll> pollHtmlBuilder = new HtmlBuilder<Poll>();
 
-
 		String body = null;
 
 		// Response first line
@@ -122,8 +121,10 @@ public class HttpResponse {
 				} else if (path.equals("/" + Consts.TASK_EDITOR)) {
 					body = taskHtmlBuilder
 							.buildTaskEditor(Consts.REMINDERS_EDITOR);
-				
-					//Polls
+				} else if (path.equals("/" + Consts.TASK_REPLY)) {
+					updateTask();
+
+					// Polls
 				} else if (path.equals("/" + Consts.POLLS_PAGE)) {
 					String userName = cookies.get(Consts.USERMAIL);
 					if (query != null && query.contains("id")) {
@@ -132,10 +133,11 @@ public class HttpResponse {
 					body = pollHtmlBuilder.buildTable(
 							pollDB.getPolls(userName), path);
 				} else if (path.equals("/" + Consts.POLL_EDITOR)) {
-					body = pollHtmlBuilder
-							.buildPollEditor(Consts.POLL_EDITOR);
-				} 
+					body = pollHtmlBuilder.buildPollEditor(Consts.POLL_EDITOR);
+				} else if (path.equals("/" + Consts.POLL_REPLY)) {
+					body = updatePoll();
 
+				}
 
 				break;
 			case POST:
@@ -425,5 +427,39 @@ public class HttpResponse {
 
 	public String getHeaders() {
 		return responseHeaders.toString();
+	}
+
+	public String updatePoll() throws SQLException {
+		String body = null;
+		if (params.containsKey("id") && params.containsKey("answer")) {
+			String userName = cookies.get(Consts.USERMAIL);
+			String answer = params.get("answer");
+			if (userName == null || answer == null) {
+				return null;
+			}
+			int id = getId();
+			if (id > 0) {
+				Poll poll = pollDB.getPollById((long) id);
+				poll.setRecipientsReplies(userName, answer);;
+				if (poll != null
+						&& poll.getStatus() != Consts.PollStatus.COMPLETED) {
+					pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, poll.getRecipientsReplies(), (long) id);
+				} else {
+					body = "<html><head><title>poll_reply.html</title></head><body>"
+							+ "The poll is closed<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
+							+ "</form></body></html>";
+				}
+			}
+		}
+		return body;
+	}
+
+	public void updateTask() throws SQLException {
+		if (params.containsKey("id")) {
+			int id = getId();
+			if (id > 0) {
+				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
+			}
+		}
 	}
 }

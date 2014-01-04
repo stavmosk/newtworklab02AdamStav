@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-
 public class PollDB extends DBManager {
 
 	String getDbFile() {
@@ -27,7 +26,8 @@ public class PollDB extends DBManager {
 								.format("create table %s(id int primary key auto_increment, user_name varchar(255), title varchar(255), "
 										+ "content varchar(1000), recipient varchar(1000), answers varchar(1000), recipientsReplies varchar(1000), "
 										+ "status varchar(255), creation_time datetime, "
-										+ "due_time varchar(255))", Consts.POLLS_TABLE));
+										+ "due_time varchar(255))",
+										Consts.POLLS_TABLE));
 			} catch (SQLException e) {
 				if (e.getErrorCode() == TABLE_EXISTS_ERROR_CODE) {
 				} else {
@@ -44,7 +44,6 @@ public class PollDB extends DBManager {
 		}
 	}
 
-
 	public void createPoll(Poll poll) throws SQLException {
 		Statement statement = null;
 
@@ -55,10 +54,8 @@ public class PollDB extends DBManager {
 				statement
 						.execute(String
 								.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , '%s' , '%s', parsedatetime('%s', '%s'), '%s')",
-										Consts.POLLS_TABLE, 
-										poll.getUserName(),
-										poll.getTitle(),
-										poll.getContent(),
+										Consts.POLLS_TABLE, poll.getUserName(),
+										poll.getTitle(), poll.getContent(),
 										poll.getRecipients(),
 										poll.getAnswers(),
 										poll.getRecipientsReplies(),
@@ -86,15 +83,16 @@ public class PollDB extends DBManager {
 			ArrayList<Poll> polls = new ArrayList<>();
 			statement = connection.createStatement();
 			ResultSet rs = statement.executeQuery(String.format(
-					"select * from %s where user_name = '%s'", Consts.POLLS_TABLE,
-					userName));
+					"select * from %s where user_name = '%s'",
+					Consts.POLLS_TABLE, userName));
 
 			while (rs.next()) {
-				Poll p = new Poll(rs.getLong("id"), rs
-						.getString("user_name"), rs.getString("title"), rs
-						.getString("content"), rs.getNString("recipient") , rs.getNString("answers") 
-						, rs.getNString("recipientsReplies") ,rs
-						.getString("status"), rs.getTimestamp("creation_time"),
+				Poll p = new Poll(rs.getLong("id"), rs.getString("user_name"),
+						rs.getString("title"), rs.getString("content"),
+						rs.getNString("recipient"), rs.getNString("answers"),
+						rs.getNString("recipientsReplies"),
+						rs.getString("status"),
+						rs.getTimestamp("creation_time"),
 						rs.getString("due_time"));
 				polls.add(p);
 
@@ -107,4 +105,61 @@ public class PollDB extends DBManager {
 		}
 
 	}
+
+	public void updatePoll(Consts.PollStatus pollStatus, long id)
+			throws SQLException {
+		String status = pollStatus.name();
+		Statement statement = null;
+		try {
+			statement = connection.createStatement();
+			statement.execute(String.format(
+					"update %s set status='%s' where id=%d",
+					Consts.POLLS_TABLE, status, id));
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
+	}
+	
+	public void updatePollAnswers(Consts.PollStatus pollStatus, String recipientsReplies, long id)
+			throws SQLException {
+		String status = pollStatus.name();
+		Statement statement = null;
+		try {
+			statement = connection.createStatement();
+			statement.execute(String.format(
+					"update %s set status='%s', recipientsReplies='%s' where id=%d",
+					Consts.POLLS_TABLE, status, recipientsReplies, id));
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
+	}
+
+	public Poll getPollById(long id) throws SQLException {
+		Statement statement = null;
+		try {
+			statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(String.format(
+					"select * from %s where id=%d", Consts.POLLS_TABLE, id));
+			if (rs.next()) {
+				return new Poll(rs.getLong("id"), rs.getString("user_name"),
+						rs.getString("title"), rs.getString("content"),
+						rs.getNString("recipient"), rs.getNString("answers"),
+						rs.getNString("recipientsReplies"),
+						rs.getString("status"),
+						rs.getTimestamp("creation_time"),
+						rs.getString("due_time"));
+			} else {
+				return null;
+			}
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
+	}
+
 }

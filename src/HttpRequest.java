@@ -135,17 +135,8 @@ public class HttpRequest {
 			}
 		}
 
-		if (parser.getPath().equals("/" + Consts.TASK_REPLY)) {
-			try {
-				updateTask();
-			} catch (SQLException e) {
-				System.err.println("Cant update the task");
-				httpResponseCode = httpResponseCode.BAD;
 
 
-			}
-		}
-		
 		if (parser.getPath().equals("/logout.html")) {
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/index.html");
@@ -302,17 +293,6 @@ public class HttpRequest {
 
 	public void setPollDB(PollDB pollDB) {
 		this.pollDB = pollDB;
-	}
-
-	public void updateTask() throws SQLException {
-
-		if (parser.getParams().containsKey("id")) {
-			int id = getId();
-			if (id > 0) {
-				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
-			}
-		}
-
 	}
 
 	private int getId() {

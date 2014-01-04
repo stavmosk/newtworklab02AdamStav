@@ -5,16 +5,14 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 
+
 public class Poll extends job {
 
-	public enum PollStatus {
-		IN_PROGRESS, COMPLETED
-	};
 
 	private LinkedList<String> recipients;
 	private LinkedList<String> answers;
 	private Map<String, String> recipientsReplies;
-	private PollStatus status;
+	private Consts.PollStatus status;
 
 	public Poll(Map<String, String> params, String userName) {
 		super(params, userName);
@@ -25,7 +23,7 @@ public class Poll extends job {
 		if (getValid()) {
 			setRecipients(params.get(Consts.RECIPIENTS.toLowerCase()));
 			setAnswers(params.get(Consts.ANSWERS.toLowerCase()));
-			setStatus(PollStatus.IN_PROGRESS);
+			setStatus(Consts.PollStatus.IN_PROGRESS);
 		}
 	}
 
@@ -101,7 +99,7 @@ public class Poll extends job {
 		if (recipients == null || recipientsReplies.isEmpty()) {
 			return "";
 		}
-
+		
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < recipients.size(); i++) {
 			String recipient = recipients.get(i);
@@ -126,17 +124,26 @@ public class Poll extends job {
 		}
 
 	}
+	
+	public void setRecipientsReplies(String userName, String answer) {
+		if (userName != null && answer != null) {
+			this.recipientsReplies.put(userName, answer);
+		} else {
+			setValid(false);
+		}
 
-	public PollStatus getStatus() {
+	}
+
+	public Consts.PollStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(PollStatus status) {
+	public void setStatus(Consts.PollStatus status) {
 		this.status = status;
 	}
 
 	public void setStatus(String status) {
-		this.status = PollStatus.valueOf(status);
+		this.status = Consts.PollStatus.valueOf(status);
 	}
 
 	public String getStatusString() {

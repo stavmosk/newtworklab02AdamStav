@@ -8,6 +8,10 @@ public class Consts {
 		IN_PROGRESS, COMPLETED, TIME_IS_DUE
 	};
 
+	public enum PollStatus {
+		IN_PROGRESS, COMPLETED
+	};
+
 	public final static String CRLF = "\r\n";
 	public static final String REMINDERS_PAGE = "reminders.html";
 	public static final String TASKS_PAGE = "tasks.html";
