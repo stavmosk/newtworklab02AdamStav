@@ -49,7 +49,7 @@ public class PollDB extends DBManager {
 		}
 	}
 
-	public void createPoll(Poll poll) throws SQLException {
+	public Long createPoll(Poll poll) throws SQLException {
 		Statement statement = null;
 
 		try {
@@ -68,7 +68,12 @@ public class PollDB extends DBManager {
 										poll.getCreationDateAndTimeString(),
 										Consts.DATE_FORMAT,
 										poll.getCreationDateAndTimeString()));
+				
+				statement = connection.createStatement();
+				ResultSet rs = statement.getGeneratedKeys();
+				rs.next();
 
+				return rs.getLong(1);
 			}
 		} finally {
 			if (statement != null) {

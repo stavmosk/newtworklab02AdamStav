@@ -52,7 +52,10 @@ public class Reminder extends Job {
 			return false;
 		}
 
-		SimpleDateFormat dateFormat = new SimpleDateFormat(Consts.DATE_FORMAT);
+		if(Consts.convertFromStringToDate(date) == null) { 
+			return false;
+		}
+		
 		return true;
 	}
 
@@ -65,9 +68,10 @@ public class Reminder extends Job {
 		return new SimpleDateFormat(Consts.DATE_FORMAT).format(dateRemindingDateFormat.getTime());
 	}
 
-	// Todo: validation
 	public void setDateRemniding(String date) {
+		if(validateDateReminding(date)) { 
 		this.dateReminding = date;
+		}
 	}
 
 }

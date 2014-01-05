@@ -48,23 +48,26 @@ public class TasksDB extends DBManager {
 		}
 	}
 
-	public void createTask(Task task) throws SQLException {
+	public Long createTask(Task task) throws SQLException {
 		Statement statement = null;
 
 		try {
 			statement = connection.createStatement();
 
 			synchronized (lock) {
-				statement
-						.execute(String
-								.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , parsedatetime('%s', '%s'), '%s')",
+				statement.execute(String.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , parsedatetime('%s', '%s'), '%s')",
 										Consts.TASKS_TABLE, task.getUserName(),
 										task.getTitle(), task.getContent(),
 										task.getRecipient(),
 										task.getStatusString(),
 										task.getCreationDateAndTimeString(),
 										Consts.DATE_FORMAT, task.getDueDate()));
+				
+				statement = connection.createStatement();
+				ResultSet rs = statement.getGeneratedKeys();
+				rs.next();
 
+				return rs.getLong(1);
 			}
 		} finally {
 			if (statement != null) {

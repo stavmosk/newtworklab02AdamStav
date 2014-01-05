@@ -13,7 +13,7 @@ public abstract class Job {
 	private Long id;
 
 	public Job(Map<String, String> params, String userName) {
-		if (params != null || !(params.isEmpty())) {
+		if (params != null && !(params.isEmpty())) {
 			this.valid = true;
 			setId(params.get("id"));
 			creationDateAndTime = new Date();
@@ -99,7 +99,7 @@ public abstract class Job {
 	public void setId(String id) {
 		if (id != null) {
 			if (id.equals("-1")) {
-				this.id = (long) -1;
+				this.id = (long)-1;
 				return;
 			}
 			try {

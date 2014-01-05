@@ -10,7 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 public class SMTPclient {
 
 	private final static String CRLF = "\r\n";
-	private final static String fromName = "Mr. Tasker";
+	private final static String fromName = "Mr.Tasker";
 
 	private String subject;
 	private String mailFrom;

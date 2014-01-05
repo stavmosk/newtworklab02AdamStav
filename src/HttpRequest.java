@@ -46,10 +46,11 @@ public class HttpRequest {
 	private RemindersDB reminderDB;
 	private TasksDB taskDB;
 	private PollDB pollDB;
+	private ConfigManager configM;
 
 	public HttpRequest(String request, ConfigManager configM, RemindersDB reminderDB, TasksDB taskDB, PollDB pollDB) { 
 		this.request = request;
-		
+		this.configM = configM;
 		this.defaultPage = configM.GetValue(Consts.CONFIG_DEFAULTPAGE);
 		this.root = configM.GetValue(Consts.CONFIG_ROOT);
 		this.reminderDB = reminderDB;
@@ -289,7 +290,8 @@ public class HttpRequest {
 		Task task = new Task(parser.getParams(), parser.getCookies().get(
 				Consts.USERMAIL));
 		if (task.getValid()) {
-			taskDB.createTask(task);
+			Long id = taskDB.createTask(task);
+			task.setId(id);
 			sendMailToTaskRecipient(task);
 			setTimerForTask(task, taskDB);
 			httpResponseCode = httpResponseCode.FOUND;
@@ -297,13 +299,14 @@ public class HttpRequest {
 		}
 	}
 	
-	private void setTimerForTask(Task currentTask, TasksDB manager ) { 
+	private void setTimerForTask(Task currentTask, TasksDB manager) { 
 		Timer reminderTimer = new Timer();
 		reminderTimer.schedule(new JobTimerTask(currentTask, manager), Consts.convertFromStringToDate(currentTask.getDueDate()));
 	}
 	
 	private void sendMailToTaskRecipient(Task task){
-		String currentContent = task.getContent() + "ServerName\task_reply.html?id=" + task.getId();
+		String link = "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME) + ":" + configM.GetValue(Consts.CONFIG_PORT)  +"/task_reply.html?id=" + task.getId();
+		String currentContent = task.getContent() + Consts.CRLF + link;
 		SMTPclient smtpTaskToRecipient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.TASK_TITLE + task.getTitle(), task.getUserName(), task.getRecipient(), currentContent, "compnet.idc.ac.il", 25, true);
 		smtpTaskToRecipient.sendSmtpMessage();
 	}
@@ -314,7 +317,8 @@ public class HttpRequest {
 				Consts.USERMAIL));
 		
 		if (poll.getValid()) {
-			pollDB.createPoll(poll);
+			Long id = pollDB.createPoll(poll);
+			poll.setId(id);
 			SendMailToPollParticipants(poll);
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/polls.html");
@@ -326,17 +330,22 @@ public class HttpRequest {
 		
 		StringBuilder contentBuilder = new StringBuilder();
 		contentBuilder.append(poll.getContent());
-		contentBuilder.append("\n");
+		contentBuilder.append(Consts.CRLF);
 		
 		SMTPclient currentSmtpClient;
 		LinkedList<String> recipients = poll.getRecipientsAsList();
-		for (String answer : answers) {
-			
-		// need to handle the url right
-		contentBuilder.append(String.format("<a href=\"ServerName/poll_reply.html?id=%d&answer=%s\">%s</a>\n", poll.getId(), answer, answer));
-		}
-		
+		String currentLink = "";
+
 		for (String recipient : recipients) {
+			
+			for (String answer : answers) {
+				
+				currentLink = "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME) + ":" + configM.GetValue(Consts.CONFIG_PORT)  + String.format("/poll_reply.html?id=%d&answer=%s&answerer=%s", poll.getId(), answer, recipient);
+				
+				contentBuilder.append(String.format(Consts.POLL_MAIL_ANSWER_LINE, answer, currentLink));
+				contentBuilder.append(Consts.CRLF);
+				}
+			
 			currentSmtpClient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.POLL_TITLE + poll.getTitle(), poll.getUserName(), recipient, contentBuilder.toString(), "compnet.idc.ac.il", 25, true);
 			currentSmtpClient.sendSmtpMessage();
 		}	

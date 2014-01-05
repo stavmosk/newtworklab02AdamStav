@@ -60,7 +60,7 @@ public class Consts {
 	public final static String POLL_TITLE = "Poll: ";
 	public final static String POLL_ANSWER_CONTENT = "My answer to your poll is: ";
 	
-	public static final String CONFIG_PORT = "port=8080";
+	public static final String CONFIG_PORT = "port";
 	public static final String CONFIG_ROOT = "root";
 	public static final String CONFIG_MAXTHREAD = "maxThreads";
 	public static final String CONFIG_DEFAULTPAGE = "defaultPage";
@@ -73,6 +73,9 @@ public class Consts {
 	public static final String CONFIG_TASKFILEPATH = "taskFilePath";
 	public static final String CONFIG_POLLFILEPATH = "pollFilePath";
 	public static final String CONFIG_SMTPPASSWORD ="SMTPPassword";
+	
+	public static final String POLL_MAIL_ANSWER_LINE = "For %s Press - %s";
+	public static final String POLL_CURRENT_STATE = "The current answers state is - ";
 
 
 	public static Date convertFromStringToDate(String date) {

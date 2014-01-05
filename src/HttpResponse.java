@@ -138,14 +138,16 @@ public class HttpResponse {
 					body = pollHtmlBuilder.buildPollEditor(Consts.POLL_EDITOR);
 				} else if (path.equals("/" + Consts.POLL_REPLY)) {
 					
-					if (params.containsKey("id") && params.containsKey("answer")) {
-						String userName = cookies.get(Consts.USERMAIL);
+					//if (params.containsKey("id") && params.containsKey("answer")) {
+						//String userName = cookies.get(Consts.USERMAIL);
+					if (params.containsKey("id") && params.containsKey("answer") && params.containsKey("answerer")) {
+					    String userName = params.get("answerer");
 						String answer = params.get("answer");
 						if (userName != null && answer != null) {
 						int id = getId();
 						if (id > 0) {
+							body = updatePoll(userName, answer, id);
 							sendMailToPollCreator(userName, answer, id);
-							body = updatePoll(userName,answer, id);
 						}
 						}
 				}
@@ -468,7 +470,14 @@ public class HttpResponse {
 		}
 		
 		// need to change with the config
-		SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentPoll.getTitle() + " answer from " + answererUserName , answererUserName, currentPoll.getUserName(), Consts.POLL_ANSWER_CONTENT + answer, "compnet.idc.ac.il", 25, true);
+		
+		StringBuilder mailContent = new StringBuilder();
+		mailContent.append(Consts.POLL_ANSWER_CONTENT + answer);
+		mailContent.append(Consts.CRLF);
+		mailContent.append(Consts.POLL_CURRENT_STATE);
+		mailContent.append(Consts.CRLF);
+		mailContent.append(currentPoll.getRecipientsReplies());
+		SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentPoll.getTitle() + " answered by " + answererUserName , answererUserName, currentPoll.getUserName(), mailContent.toString(), "compnet.idc.ac.il", 25, true);
 		SmtpToCreator.sendSmtpMessage();
 		
 		} 
