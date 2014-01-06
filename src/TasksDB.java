@@ -48,6 +48,7 @@ public class TasksDB extends DBManager {
 		}
 	}
 
+
 	public Long createTask(Task task) throws SQLException {
 		Statement statement = null;
 
@@ -57,7 +58,7 @@ public class TasksDB extends DBManager {
 			synchronized (lock) {
 				statement.execute(String.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , parsedatetime('%s', '%s'), '%s')",
 										Consts.TASKS_TABLE, task.getUserName(),
-										task.getTitle(), task.getContent(),
+										Consts.replaceApostrophes(task.getTitle()), Consts.replaceApostrophes(task.getContent()),
 										task.getRecipient(),
 										task.getStatusString(),
 										task.getCreationDateAndTimeString(),
@@ -96,6 +97,32 @@ public class TasksDB extends DBManager {
 						.getString("content"), rs.getNString("recipient"), rs
 						.getString("status"), rs.getTimestamp("creation_time"),
 						rs.getString("due_time")));
+			}
+
+			return results;
+		} finally {
+			if (statement != null) {
+				statement.close();
+			}
+		}
+	}
+	
+	public ArrayList<Task> getAllTasks() throws SQLException {
+		Statement statement = null;
+
+		try {
+			ArrayList<Task> results = new ArrayList<>();
+			statement = connection.createStatement();
+			ResultSet rs = statement.executeQuery(String.format(
+					"select * from %s",
+					Consts.TASKS_TABLE));
+
+			while (rs.next()) {
+				results.add(new Task(rs.getLong("id"), rs
+						.getString("user_name"), rs.getString("title"), rs
+						.getString("content"), rs.getNString("recipient"), rs
+						.getString("status"), rs.getTimestamp("creation_time"),
+						rs.getString("due_time")));
 
 			}
 
@@ -105,7 +132,6 @@ public class TasksDB extends DBManager {
 				statement.close();
 			}
 		}
-
 	}
 
 	public void updateTask(Consts.TaskStatus taskStatus, long id) throws SQLException {

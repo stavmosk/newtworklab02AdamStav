@@ -33,10 +33,17 @@ public class Poll extends Job {
 		this.recipients = new LinkedList<String>();
 		this.answers = new LinkedList<String>();
 		this.recipientsReplies = new HashMap<String, String>();
-		setRecipients(recipent);
-		setAnswers(answers);
+		//setRecipients(recipent);
+		//setAnswers(answers);
+		setRecipients(replaceSpaceWithCRLF(recipent));
+		setAnswers(replaceSpaceWithCRLF(answers));
 		setRecipientsReplies(recipientsReplies);
 		setStatus(status);
+	}
+	
+	private String replaceSpaceWithCRLF(String toReplace) { 
+		String toReturn = toReplace.replace(" ", Consts.CRLF);
+		return toReturn;
 	}
 	
 	public LinkedList<String> getRecipientsAsList() { 
@@ -50,10 +57,12 @@ public class Poll extends Job {
 			ListIterator<String> itr = recipients.listIterator();
 			while (itr.hasNext()) {
 				builder.append(itr.next() + " ");
+				//builder.append(itr.next() + Consts.CRLF);
 			}
 
 			// Removes the last space.
 			builder.deleteCharAt(builder.length() - 1);
+			//builder.deleteCharAt(builder.length() - 2);
 			return builder.toString();
 		}
 		return "";
@@ -81,10 +90,12 @@ public class Poll extends Job {
 			ListIterator<String> itr = answers.listIterator();
 			while (itr.hasNext()) {
 				builder.append(itr.next() + " ");
+				//builder.append(itr.next() + Consts.CRLF);
 			}
 
 			// Removes the last space.
 			builder.deleteCharAt(builder.length() - 1);
+			//builder.deleteCharAt(builder.length() - 2);
 			return builder.toString();
 		}
 		return "";
@@ -105,24 +116,21 @@ public class Poll extends Job {
 	public Map<String,String> getRecipientsRepliesAsMap() {
 	return recipientsReplies;
 	}
-
-	public String getRecipientsReplies() {
-		if (recipients == null || recipientsReplies.isEmpty()) {
+	
+	public String getRecipientsReplies() { 
+		if (recipientsReplies == null || recipientsReplies.isEmpty()) { 
 			return "";
 		}
-		
 		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < recipients.size(); i++) {
-			String recipient = recipients.get(i);
-			if (recipientsReplies.get(recipient) != null) {
-				builder.append(recipient);
-				builder.append(":");
-				builder.append(recipientsReplies.get(recipient) + ",");
-			}
+		for (Map.Entry<String,String> entry : recipientsReplies.entrySet()) {
+		   builder.append(entry.getKey());
+		   builder.append(":");
+		   builder.append(entry.getValue());
+		   builder.append(",");
 		}
 		return builder.toString();
 	}
-
+	
 	public void setRecipientsReplies(String recipientsReplies) {
 		if (recipientsReplies == null || recipientsReplies.length() == 0) {
 			setValid(false);

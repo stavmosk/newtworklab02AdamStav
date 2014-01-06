@@ -2,7 +2,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Timer;
 
 /**
  * Parse the config file, and according to its parameters start to listen to the
@@ -28,9 +31,12 @@ public class webServer {
 	private static LinkedList<String> userMailCookies;
 
 	private static void startListening(ConfigManager configM) {
-		TasksDB taskManager = new TasksDB(configM.GetValue(Consts.CONFIG_TASKFILEPATH));
-		RemindersDB reminderManager = new RemindersDB(configM.GetValue(Consts.CONFIG_REMINDERFILE));
-		PollDB pollManager = new PollDB(configM.GetValue(Consts.CONFIG_POLLFILEPATH));
+		TasksDB taskManager = new TasksDB(
+				configM.GetValue(Consts.CONFIG_TASKFILEPATH));
+		RemindersDB reminderManager = new RemindersDB(
+				configM.GetValue(Consts.CONFIG_REMINDERFILE));
+		PollDB pollManager = new PollDB(
+				configM.GetValue(Consts.CONFIG_POLLFILEPATH));
 		try {
 			reminderManager.createDb();
 			taskManager.createDb();
@@ -38,28 +44,42 @@ public class webServer {
 		} catch (Exception e1) {
 			System.out.println("Error initlize Data base.");
 		}
-		
-		// I need to go over all the data bases and create timers for them?
-		/*
-		ArrayList<Reminder> dueTimeReminders = null;
+
+		ArrayList<Reminder> currentReminders = null;
+		ArrayList<Task> currentTasks = null;
 		try {
-			 dueTimeReminders = reminderManager.getRemindersBeforeCurrentTime();
+			currentReminders = reminderManager.getAllReminders();
+			currentTasks = taskManager.getAllTasks();
 		} catch (SQLException e2) {
-			System.err.println("Error loading due time reminders from table");
+			System.err
+					.println("Error loading the current reminder or tasks at load up");
 		}
-		
-		if (dueTimeReminders != null) { 
-			SMTPclient currentClient = null;
-			for (Reminder reminder : dueTimeReminders) {
-				
-				// need to change this to work with the config
-				currentClient = new SMTPclient(configM.GetValue(Consts.CONFIG_SMTPUSERNAME), configM.GetValue(Consts.CONFIG_SMTPPASSWORD), reminder.getTitle(), reminder.getUserName(), reminder.getUserName(), reminder.getContent(), configM.GetValue(Consts.CONFIG_SMTPNAME), Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)), Boolean.parseBoolean(configM.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
-				currentClient.sendSmtpMessage();
+
+		// will double send those who were sent when the server was on 
+		if (currentReminders != null && currentReminders.size() != 0) {
+			for (Reminder reminder : currentReminders) {
+				if (reminder.getStatus() == Consts.ReminderStatus.NOT_SENT) { 
+				Timer currentTimer = new Timer();
+				currentTimer.schedule(new JobTimerTask(reminder,
+						reminderManager, configM), reminder
+						.getDateRemindingDate());
+				}
 			}
-		}*/
-		
-		// run on all the current data base and start timers for them
-		
+		}
+
+		if (currentTasks != null && currentTasks.size() != 0) {
+			for (Task task : currentTasks) {
+				
+				// need to think if this logic is enough
+				if (task.getStatus() == Consts.TaskStatus.IN_PROGRESS) {
+					Timer currentTimer = new Timer();
+					currentTimer.schedule(new JobTimerTask(task,
+							reminderManager, configM), Consts
+							.convertFromStringToDate(task.getDueDate()));
+				}
+			}
+		}
+
 		System.out.println(STARTING_SERVER);
 		ServerSocket server = null;
 		ActiveThread[] threadsPool = null;
@@ -82,7 +102,8 @@ public class webServer {
 				currentClient = server.accept();
 
 				synchronized (list) {
-					list.addLast(new SocketThread(configM, currentClient, reminderManager, taskManager, pollManager));
+					list.addLast(new SocketThread(configM, currentClient,
+							reminderManager, taskManager, pollManager));
 					list.notify();
 				}
 			}
@@ -168,7 +189,7 @@ public class webServer {
 		return true;
 	}
 
-	public static void main(String[] args) {		
+	public static void main(String[] args) {
 		userMailCookies = new LinkedList<String>();
 
 		try {
@@ -194,7 +215,6 @@ public class webServer {
 				System.err.println("config file isnt valid");
 				System.exit(0);
 			}
-
 
 			startListening(configM);
 

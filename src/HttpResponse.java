@@ -125,8 +125,14 @@ public class HttpResponse {
 					if (params.containsKey("id")) {
 						int id = getId();
 						if (id > 0) {
-							updateTaskAsCompleted(id);
-							sendMailToTaskCreator(id);
+							Task currentTask = null;
+							try {
+								currentTask = taskDB.getTaskById(id);
+							} catch (SQLException e) {
+								System.err.println("Error getting a task by Id while sending the email to the creator");
+							}
+							sendMailToTaskCreator(currentTask);
+							updateTaskAsCompleted(currentTask);
 						}
 					}
 
@@ -141,10 +147,6 @@ public class HttpResponse {
 				} else if (path.equals("/" + Consts.POLL_EDITOR)) {
 					body = pollHtmlBuilder.buildPollEditor(Consts.POLL_EDITOR);
 				} else if (path.equals("/" + Consts.POLL_REPLY)) {
-
-					// if (params.containsKey("id") &&
-					// params.containsKey("answer")) {
-					// String userName = cookies.get(Consts.USERMAIL);
 					if (params.containsKey("id")
 							&& params.containsKey("answer")
 							&& params.containsKey("answerer")) {
@@ -452,18 +454,22 @@ public class HttpResponse {
 
 	public String updatePoll(String answererUserName, String answer, long id)
 			throws SQLException {
+		
 		String body = null;
+		
 		Poll currentPoll = pollDB.getPollById((long) id);
-		if (currentPoll != null
-				&& currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+		
+		if (currentPoll != null && currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+			
 			currentPoll.setRecipientsReplies(answererUserName, answer);
-			if (currentPoll.getRecipientsRepliesAsMap().size() == currentPoll
-					.getRecipientsAsList().size()) {
-				pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED,
-						currentPoll.getRecipientsReplies(), (long) id);
+			
+			if (currentPoll.getRecipientsRepliesAsMap().size() == currentPoll.getRecipientsAsList().size()) {
+				
+				// Before we set it as completed send the mail to the creator
+				sendMailToPollCreator(answererUserName, answer, id);
+				pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, currentPoll.getRecipientsReplies(), (long)id);
 			} else {
-				pollDB.updatePollAnswers(Consts.PollStatus.IN_PROGRESS,
-						currentPoll.getRecipientsReplies(), (long) id);
+				pollDB.updatePollAnswers(Consts.PollStatus.IN_PROGRESS, currentPoll.getRecipientsReplies(), (long)id);
 			}
 		} else {
 			body = "<html><head><title>poll_reply.html</title></head><body>"
@@ -479,12 +485,13 @@ public class HttpResponse {
 		try {
 			currentPoll = pollDB.getPollById(id);
 		} catch (SQLException e) {
-			System.err
-					.println("Error getting a poll by Id while sending the email to the creator");
+			System.err.println("Error getting a poll by Id while sending the email to the creator");
 		}
 
 		if (currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+			
 			StringBuilder mailContent = new StringBuilder();
+			mailContent.append(Consts.CRLF);
 			mailContent.append(Consts.POLL_ANSWER_CONTENT + answer);
 			mailContent.append(Consts.CRLF);
 			mailContent.append(Consts.POLL_CURRENT_STATE);
@@ -495,27 +502,16 @@ public class HttpResponse {
 					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
 					configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
 					currentPoll.getTitle() + " answered by " + answererUserName,
-					answererUserName, currentPoll.getUserName(), mailContent
-							.toString(), configM
-							.GetValue(Consts.CONFIG_SMTPNAME),
+					answererUserName, currentPoll.getUserName(), mailContent.toString(), configM.GetValue(Consts.CONFIG_SMTPNAME),
 					Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)),
-					Boolean.parseBoolean(configM
-							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
+					Boolean.parseBoolean(configM.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
 			SmtpToCreator.sendSmtpMessage();
 		}
-
 	}
 
-	public void sendMailToTaskCreator(int id) {
-		Task currentTask = null;
-		try {
-			currentTask = taskDB.getTaskById(id);
-		} catch (SQLException e) {
-			System.err
-					.println("Error getting a task by Id while sending the email to the creator");
-		}
-
+	public void sendMailToTaskCreator(Task currentTask) {
 		if (currentTask.getStatus() == Consts.TaskStatus.IN_PROGRESS) {
+			
 			SMTPclient SmtpToCreator = new SMTPclient(
 					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
 					configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
@@ -527,10 +523,13 @@ public class HttpResponse {
 					Boolean.parseBoolean(configM
 							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
 			SmtpToCreator.sendSmtpMessage();
+			
 		}
 	}
 
-	public void updateTaskAsCompleted(int id) throws SQLException {
-		taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
+	public void updateTaskAsCompleted(Task currentTask) throws SQLException {
+		if (currentTask.getStatus() == Consts.TaskStatus.IN_PROGRESS) {
+		taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long)currentTask.getId());
+		}
 	}
 }

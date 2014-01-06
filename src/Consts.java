@@ -11,6 +11,10 @@ public class Consts {
 	public enum PollStatus {
 		IN_PROGRESS, COMPLETED
 	};
+	
+	public enum ReminderStatus {
+		NOT_SENT, SENT
+	};
 
 	public final static String CRLF = "\r\n";
 	public static final String REMINDERS_PAGE = "reminders.html";
@@ -76,6 +80,11 @@ public class Consts {
 	
 	public static final String POLL_MAIL_ANSWER_LINE = "For %s Press - %s";
 	public static final String POLL_CURRENT_STATE = "The current answers state is - ";
+	
+	public static String replaceApostrophes(String toReplace) { 
+		String toReturn = toReplace.replace("'", "''");
+		return toReturn;
+	}
 
 
 	public static Date convertFromStringToDate(String date) {

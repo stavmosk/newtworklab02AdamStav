@@ -60,10 +60,10 @@ public class PollDB extends DBManager {
 						.execute(String
 								.format("insert into %s values(null, '%s', '%s', '%s', '%s', '%s' , '%s' , '%s', parsedatetime('%s', '%s'), '%s')",
 										Consts.POLLS_TABLE, poll.getUserName(),
-										poll.getTitle(), poll.getContent(),
+										Consts.replaceApostrophes(poll.getTitle()), Consts.replaceApostrophes(poll.getContent()),
 										poll.getRecipients(),
-										poll.getAnswers(),
-										poll.getRecipientsReplies(),
+										Consts.replaceApostrophes(poll.getAnswers()),
+										Consts.replaceApostrophes(poll.getRecipientsReplies()),
 										poll.getStatusString(),
 										poll.getCreationDateAndTimeString(),
 										Consts.DATE_FORMAT,
@@ -105,7 +105,6 @@ public class PollDB extends DBManager {
 						rs.getTimestamp("creation_time"),
 						rs.getString("due_time"));
 				polls.add(p);
-
 			}
 			return polls;
 		} finally {
@@ -113,8 +112,8 @@ public class PollDB extends DBManager {
 				statement.close();
 			}
 		}
-
 	}
+	
 
 	public void updatePoll(Consts.PollStatus pollStatus, long id)
 			throws SQLException {

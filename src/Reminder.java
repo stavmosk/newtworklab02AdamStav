@@ -7,15 +7,17 @@ public class Reminder extends Job {
 
 	private String dateReminding;
 	private Date dateRemindingDateFormat;
+	private Consts.ReminderStatus status;
 
 	public Reminder(Map<String, String> params, String userName) {
 		super(params, userName);
-		setDateRemniding(params.get(Consts.REMINDING_DATE.toLowerCase()),
+		setStatus(Consts.ReminderStatus.NOT_SENT);
+		setDateReminding(params.get(Consts.REMINDING_DATE.toLowerCase()),
 				params.get(Consts.REMINDING_TIME.toLowerCase()));
 		dateRemindingDateFormat = Consts.convertFromStringToDate(this.dateReminding);
 	}
 
-	private void setDateRemniding(String date, String time) {
+	private void setDateReminding(String date, String time) {
 		if ((date != null) && (time != null)) {
 			dateReminding = date + " " + time;
 		} else {
@@ -23,22 +25,48 @@ public class Reminder extends Job {
 		}
 	}
 
+	public Reminder(String userName, String title, String content, String status,
+			String dateRemniding) {
+		super((long) -1, title, content, userName, null);
+		setStatus(status);
+		this.dateReminding = dateRemniding;
+	}
+	
 	public Reminder(String userName, String title, String content,
 			String dateRemniding) {
 		super((long) -1, title, content, userName, null);
-		this.dateReminding = dateRemniding;
-	}
-
-	public Reminder(long id, String userName, String title, String content,
-			Date creation_time, String dateRemniding) {
-		super(id, userName, title, content, creation_time);
+		setStatus(status);
 		this.dateReminding = dateRemniding;
 	}
 	
 	public Reminder(long id, String userName, String title, String content,
 			Date creation_time, Date dateRemniding) {
 		super(id, userName, title, content, creation_time);
+		setStatus(status);
 		this.dateRemindingDateFormat = dateRemniding;
+	}
+	
+	public Reminder(long id, String userName, String title, String content, String status,
+			Date creation_time, Date dateRemniding) {
+		super(id, userName, title, content, creation_time);
+		setStatus(status);
+		this.dateRemindingDateFormat = dateRemniding;
+	}
+	
+	public void setStatus(String status) {
+		this.status = Consts.ReminderStatus.valueOf(status);
+	}
+	
+	public Consts.ReminderStatus getStatus() {
+		return this.status;
+	}
+
+	public String getStatusString() {
+		return this.status.name();
+	}
+
+	public void setStatus(Consts.ReminderStatus status) {
+		this.status = status;
 	}
 
 	/**

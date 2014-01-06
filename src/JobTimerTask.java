@@ -15,7 +15,9 @@ public class JobTimerTask extends TimerTask {
 
 	@Override
 	public void run() {
-		if (currentJob instanceof Reminder) {
+		if (currentJob instanceof Reminder && manager instanceof RemindersDB ) {
+			
+			if (((Reminder)currentJob).getStatus() == Consts.ReminderStatus.NOT_SENT) { 
 			
 			SMTPclient currentSmtpClient = new SMTPclient(
 					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
@@ -28,6 +30,15 @@ public class JobTimerTask extends TimerTask {
 							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
 			
 			currentSmtpClient.sendSmtpMessage();
+			
+			try {
+				((RemindersDB) manager).updateRemindersStatus(Consts.ReminderStatus.SENT, currentJob.getId());
+			} catch (SQLException e) {
+				System.err.println("Error updating a job as mail sent");
+				e.printStackTrace();
+			}
+			
+			}
 
 		} else {
 			if (currentJob instanceof Task && manager instanceof TasksDB) {
@@ -66,7 +77,7 @@ public class JobTimerTask extends TimerTask {
 					((TasksDB) manager).updateTask(Consts.TaskStatus.TIME_IS_DUE, currentJob.getId());
 				} catch (SQLException e) {
 					System.err
-							.println("Error updating the task as over due time");
+							.println("Error updating a task as over due time");
 				}
 				// Update the table as over the time
 				// I need jobs to have their database

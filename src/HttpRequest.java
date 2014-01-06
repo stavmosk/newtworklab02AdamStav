@@ -277,18 +277,17 @@ public class HttpRequest {
 		Reminder reminder = new Reminder(parser.getParams(), parser
 				.getCookies().get(Consts.USERMAIL));
 		if (reminder.getValid()) {
-			reminderDB.addOrupdateReminder(reminder);
+			Long id = reminderDB.addOrupdateReminder(reminder);
+			reminder.setId(id);
 			setTimerForReminder(reminder, reminderDB);
 			httpResponseCode = httpResponseCode.FOUND;
 			parser.setPath("/reminders.html");
 		}
 	}
 
-	public void setTimerForReminder(Reminder currentReminder,
-			RemindersDB manager) {
+	public void setTimerForReminder(Reminder currentReminder, RemindersDB manager) {
 		Timer reminderTimer = new Timer();
-		reminderTimer.schedule(new JobTimerTask(currentReminder, manager, configM),
-				currentReminder.getDateRemindingDate());
+		reminderTimer.schedule(new JobTimerTask(currentReminder, manager, configM), currentReminder.getDateRemindingDate());
 	}
 
 	private void validateTask() throws SQLException {

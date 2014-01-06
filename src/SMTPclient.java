@@ -150,6 +150,7 @@ public class SMTPclient {
 				os.writeBytes("From: " + fromName + CRLF);
 				// check what should be written after the sender
 				os.writeBytes("Sender: " + mailFrom + CRLF);
+				os.writeBytes(CRLF);
 				os.writeBytes(messageData);
 				os.writeBytes(CRLF + "." + CRLF);
 
