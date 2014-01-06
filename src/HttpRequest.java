@@ -48,7 +48,8 @@ public class HttpRequest {
 	private PollDB pollDB;
 	private ConfigManager configM;
 
-	public HttpRequest(String request, ConfigManager configM, RemindersDB reminderDB, TasksDB taskDB, PollDB pollDB) { 
+	public HttpRequest(String request, ConfigManager configM,
+			RemindersDB reminderDB, TasksDB taskDB, PollDB pollDB) {
 		this.request = request;
 		this.configM = configM;
 		this.defaultPage = configM.GetValue(Consts.CONFIG_DEFAULTPAGE);
@@ -63,7 +64,7 @@ public class HttpRequest {
 			validateRequest();
 		}
 	}
-	
+
 	/**
 	 * Given a request, parse it using http parser and validate its headers and
 	 * body. Decide the http response code each request gets.
@@ -118,7 +119,11 @@ public class HttpRequest {
 		validateVersion();
 		validatePath();
 		validateHeaders();
-		validateCookie();
+
+		if (!parser.getPath().equals("/" + Consts.TASK_REPLY)
+				&& !parser.getPath().equals("/" + Consts.POLL_REPLY)) {
+			validateCookie();
+		}
 
 		// Add or update a new reminder
 		if (parser.getPath().equals("/" + Consts.REMINDERS_SUBMIT)) {
@@ -148,8 +153,6 @@ public class HttpRequest {
 
 			}
 		}
-
-
 
 		if (parser.getPath().equals("/logout.html")) {
 			httpResponseCode = httpResponseCode.FOUND;
@@ -280,10 +283,12 @@ public class HttpRequest {
 			parser.setPath("/reminders.html");
 		}
 	}
-	
-	public void setTimerForReminder(Reminder currentReminder, RemindersDB manager ) { 
+
+	public void setTimerForReminder(Reminder currentReminder,
+			RemindersDB manager) {
 		Timer reminderTimer = new Timer();
-		reminderTimer.schedule(new JobTimerTask(currentReminder, manager), currentReminder.getDateRemindingDate());
+		reminderTimer.schedule(new JobTimerTask(currentReminder, manager, configM),
+				currentReminder.getDateRemindingDate());
 	}
 
 	private void validateTask() throws SQLException {
@@ -298,24 +303,37 @@ public class HttpRequest {
 			parser.setPath("/tasks.html");
 		}
 	}
-	
-	private void setTimerForTask(Task currentTask, TasksDB manager) { 
+
+	private void setTimerForTask(Task currentTask, TasksDB manager) {
 		Timer reminderTimer = new Timer();
-		reminderTimer.schedule(new JobTimerTask(currentTask, manager), Consts.convertFromStringToDate(currentTask.getDueDate()));
+		reminderTimer.schedule(new JobTimerTask(currentTask, manager, configM),
+				Consts.convertFromStringToDate(currentTask.getDueDate()));
 	}
-	
-	private void sendMailToTaskRecipient(Task task){
-		String link = "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME) + ":" + configM.GetValue(Consts.CONFIG_PORT)  +"/task_reply.html?id=" + task.getId();
+
+	private void sendMailToTaskRecipient(Task task) {
+		String link = "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME)
+				+ ":" + configM.GetValue(Consts.CONFIG_PORT)
+				+ "/task_reply.html?id=" + task.getId();
 		String currentContent = task.getContent() + Consts.CRLF + link;
-		SMTPclient smtpTaskToRecipient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.TASK_TITLE + task.getTitle(), task.getUserName(), task.getRecipient(), currentContent, "compnet.idc.ac.il", 25, true);
-		smtpTaskToRecipient.sendSmtpMessage();
+		
+		SMTPclient SmtpTaskToRecipient = new SMTPclient(
+				configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
+				configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
+				Consts.TASK_TITLE + task.getTitle(),
+				task.getUserName(), task.getRecipient(), currentContent,
+				configM.GetValue(Consts.CONFIG_SMTPNAME),
+				Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)),
+				Boolean.parseBoolean(configM.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
+		
+		
+		SmtpTaskToRecipient.sendSmtpMessage();
 	}
 
 	private void validatePoll() throws SQLException {
 
 		Poll poll = new Poll(parser.getParams(), parser.getCookies().get(
 				Consts.USERMAIL));
-		
+
 		if (poll.getValid()) {
 			Long id = pollDB.createPoll(poll);
 			poll.setId(id);
@@ -324,35 +342,62 @@ public class HttpRequest {
 			parser.setPath("/polls.html");
 		}
 	}
-	
-	private void SendMailToPollParticipants(Poll poll) { 
+
+	private void SendMailToPollParticipants(Poll poll) {
 		LinkedList<String> answers = poll.getAnswersAsList();
-		
+
 		StringBuilder contentBuilder = new StringBuilder();
-		contentBuilder.append(poll.getContent());
-		contentBuilder.append(Consts.CRLF);
-		
+
 		SMTPclient currentSmtpClient;
 		LinkedList<String> recipients = poll.getRecipientsAsList();
 		String currentLink = "";
 
 		for (String recipient : recipients) {
-			
+			contentBuilder = new StringBuilder();
+			contentBuilder.append(poll.getContent());
+			contentBuilder.append(Consts.CRLF);
+
 			for (String answer : answers) {
-				
-				currentLink = "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME) + ":" + configM.GetValue(Consts.CONFIG_PORT)  + String.format("/poll_reply.html?id=%d&answer=%s&answerer=%s", poll.getId(), answer, recipient);
-				
-				contentBuilder.append(String.format(Consts.POLL_MAIL_ANSWER_LINE, answer, currentLink));
+
+				currentLink = "http://"
+						+ configM.GetValue(Consts.CONFIG_SERVERNAME)
+						+ ":"
+						+ configM.GetValue(Consts.CONFIG_PORT)
+						+ String.format(
+								"/poll_reply.html?id=%d&answer=%s&answerer=%s",
+								poll.getId(), replaceSpace(answer), recipient);
+
+				contentBuilder.append(String.format(
+						Consts.POLL_MAIL_ANSWER_LINE, answer, currentLink));
 				contentBuilder.append(Consts.CRLF);
-				}
+			}
+
+			currentSmtpClient = new SMTPclient(
+					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
+					configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
+					Consts.POLL_TITLE + poll.getTitle(),
+					poll.getUserName(), recipient,
+					contentBuilder.toString(),
+					configM.GetValue(Consts.CONFIG_SMTPNAME),
+					Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)),
+					Boolean.parseBoolean(configM
+							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
 			
-			currentSmtpClient = new SMTPclient("tasker@cscidc.ac.il", "password", Consts.POLL_TITLE + poll.getTitle(), poll.getUserName(), recipient, contentBuilder.toString(), "compnet.idc.ac.il", 25, true);
 			currentSmtpClient.sendSmtpMessage();
-		}	
+		}
+	}
+
+	private String replaceSpace(String toReplace) {
+		String toReturn = toReplace.replace(" ", "%20");
+		return toReturn;
 	}
 
 	public PollDB getPollDB() {
 		return pollDB;
+	}
+
+	public ConfigManager getConfigM() {
+		return configM;
 	}
 
 	public void setPollDB(PollDB pollDB) {

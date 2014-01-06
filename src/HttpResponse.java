@@ -39,6 +39,7 @@ public class HttpResponse {
 	private RemindersDB remindersDB;
 	private TasksDB taskDB;
 	private PollDB pollDB;
+	private ConfigManager configM;
 
 	public HttpResponse(HttpRequest request) throws SQLException {
 		this.root = request.getRoot();
@@ -57,6 +58,7 @@ public class HttpResponse {
 		this.remindersDB = request.getReminderDB();
 		this.taskDB = request.getTaskDB();
 		this.pollDB = request.getPollDB();
+		this.configM = request.getConfigM();
 		setResponse();
 	}
 
@@ -113,44 +115,49 @@ public class HttpResponse {
 					if (query != null && query.contains("id")) {
 						taskDB.deleteById((long) getId());
 					}
-					body = taskHtmlBuilder.buildTable(taskDB.getTasks(userName), path);
+					body = taskHtmlBuilder.buildTable(
+							taskDB.getTasks(userName), path);
 				} else if (path.equals("/" + Consts.TASK_EDITOR)) {
 					body = taskHtmlBuilder
 							.buildTaskEditor(Consts.REMINDERS_EDITOR);
 				} else if (path.equals("/" + Consts.TASK_REPLY)) {
-					
+
 					if (params.containsKey("id")) {
 						int id = getId();
-						if (id > 0) { 
-						updateTaskAsCompleted(id);
-						sendMailToTaskCreator(id);
+						if (id > 0) {
+							updateTaskAsCompleted(id);
+							sendMailToTaskCreator(id);
 						}
 					}
-					
+
 					// Polls
 				} else if (path.equals("/" + Consts.POLLS_PAGE)) {
 					String userName = cookies.get(Consts.USERMAIL);
 					if (query != null && query.contains("id")) {
 						pollDB.deleteById((long) getId());
 					}
-					body = pollHtmlBuilder.buildTable(pollDB.getPolls(userName), path);
+					body = pollHtmlBuilder.buildTable(
+							pollDB.getPolls(userName), path);
 				} else if (path.equals("/" + Consts.POLL_EDITOR)) {
 					body = pollHtmlBuilder.buildPollEditor(Consts.POLL_EDITOR);
 				} else if (path.equals("/" + Consts.POLL_REPLY)) {
-					
-					//if (params.containsKey("id") && params.containsKey("answer")) {
-						//String userName = cookies.get(Consts.USERMAIL);
-					if (params.containsKey("id") && params.containsKey("answer") && params.containsKey("answerer")) {
-					    String userName = params.get("answerer");
+
+					// if (params.containsKey("id") &&
+					// params.containsKey("answer")) {
+					// String userName = cookies.get(Consts.USERMAIL);
+					if (params.containsKey("id")
+							&& params.containsKey("answer")
+							&& params.containsKey("answerer")) {
+						String userName = params.get("answerer");
 						String answer = params.get("answer");
 						if (userName != null && answer != null) {
-						int id = getId();
-						if (id > 0) {
-							body = updatePoll(userName, answer, id);
-							sendMailToPollCreator(userName, answer, id);
+							int id = getId();
+							if (id > 0) {
+								body = updatePoll(userName, answer, id);
+								sendMailToPollCreator(userName, answer, id);
+							}
 						}
-						}
-				}
+					}
 				}
 				break;
 			case POST:
@@ -412,7 +419,7 @@ public class HttpResponse {
 			return bFile;
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
-		} 
+		}
 		return null;
 	}
 
@@ -443,60 +450,87 @@ public class HttpResponse {
 		return responseHeaders.toString();
 	}
 
-	public String updatePoll(String answererUserName, String answer, long id) throws SQLException {
-				String body = null;
-				Poll currentPoll = pollDB.getPollById((long) id);
-				if (currentPoll != null && currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
-					currentPoll.setRecipientsReplies(answererUserName, answer);
-					if (currentPoll.getRecipientsRepliesAsMap().size() == currentPoll.getRecipientsAsList().size()) { 
-					pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED, currentPoll.getRecipientsReplies(), (long)id);
-					} else { 
-						pollDB.updatePollAnswers(Consts.PollStatus.IN_PROGRESS, currentPoll.getRecipientsReplies(), (long)id);
-					}
-				} else {
-					body = "<html><head><title>poll_reply.html</title></head><body>"
-							+ "The poll is not avilable<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
-							+ "</form></body></html>";
-				}
+	public String updatePoll(String answererUserName, String answer, long id)
+			throws SQLException {
+		String body = null;
+		Poll currentPoll = pollDB.getPollById((long) id);
+		if (currentPoll != null
+				&& currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+			currentPoll.setRecipientsReplies(answererUserName, answer);
+			if (currentPoll.getRecipientsRepliesAsMap().size() == currentPoll
+					.getRecipientsAsList().size()) {
+				pollDB.updatePollAnswers(Consts.PollStatus.COMPLETED,
+						currentPoll.getRecipientsReplies(), (long) id);
+			} else {
+				pollDB.updatePollAnswers(Consts.PollStatus.IN_PROGRESS,
+						currentPoll.getRecipientsReplies(), (long) id);
+			}
+		} else {
+			body = "<html><head><title>poll_reply.html</title></head><body>"
+					+ "The poll is not avilable<form action=\"polls.html\"><input type=\"submit\" value=\"Go back\">"
+					+ "</form></body></html>";
+		}
 		return body;
 	}
-	
-	public void sendMailToPollCreator(String answererUserName, String answer, long id) { 
+
+	public void sendMailToPollCreator(String answererUserName, String answer,
+			long id) {
 		Poll currentPoll = null;
 		try {
 			currentPoll = pollDB.getPollById(id);
 		} catch (SQLException e) {
-			System.err.println("Error getting a poll by Id while sending the email to the creator");
+			System.err
+					.println("Error getting a poll by Id while sending the email to the creator");
 		}
-		
-		// need to change with the config
-		
-		StringBuilder mailContent = new StringBuilder();
-		mailContent.append(Consts.POLL_ANSWER_CONTENT + answer);
-		mailContent.append(Consts.CRLF);
-		mailContent.append(Consts.POLL_CURRENT_STATE);
-		mailContent.append(Consts.CRLF);
-		mailContent.append(currentPoll.getRecipientsReplies());
-		SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentPoll.getTitle() + " answered by " + answererUserName , answererUserName, currentPoll.getUserName(), mailContent.toString(), "compnet.idc.ac.il", 25, true);
-		SmtpToCreator.sendSmtpMessage();
-		
-		} 
-	
-	public void sendMailToTaskCreator(int id) { 
+
+		if (currentPoll.getStatus() != Consts.PollStatus.COMPLETED) {
+			StringBuilder mailContent = new StringBuilder();
+			mailContent.append(Consts.POLL_ANSWER_CONTENT + answer);
+			mailContent.append(Consts.CRLF);
+			mailContent.append(Consts.POLL_CURRENT_STATE);
+			mailContent.append(Consts.CRLF);
+			mailContent.append(currentPoll.getRecipientsReplies());
+
+			SMTPclient SmtpToCreator = new SMTPclient(
+					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
+					configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
+					currentPoll.getTitle() + " answered by " + answererUserName,
+					answererUserName, currentPoll.getUserName(), mailContent
+							.toString(), configM
+							.GetValue(Consts.CONFIG_SMTPNAME),
+					Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)),
+					Boolean.parseBoolean(configM
+							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
+			SmtpToCreator.sendSmtpMessage();
+		}
+
+	}
+
+	public void sendMailToTaskCreator(int id) {
 		Task currentTask = null;
 		try {
 			currentTask = taskDB.getTaskById(id);
 		} catch (SQLException e) {
-			System.err.println("Error getting a task by Id while sending the email to the creator");
+			System.err
+					.println("Error getting a task by Id while sending the email to the creator");
 		}
-		
-				// need to change with the config
-				SMTPclient SmtpToCreator =  new SMTPclient("tasker@cscidc.ac.il", "password", currentTask.getTitle() + " is completed" , currentTask.getUserName(), currentTask.getUserName(), Consts.TASK_COMPLETED, "compnet.idc.ac.il", 25, true);
-				SmtpToCreator.sendSmtpMessage();
-		} 
-	
+
+		if (currentTask.getStatus() == Consts.TaskStatus.IN_PROGRESS) {
+			SMTPclient SmtpToCreator = new SMTPclient(
+					configM.GetValue(Consts.CONFIG_SMTPUSERNAME),
+					configM.GetValue(Consts.CONFIG_SMTPPASSWORD),
+					currentTask.getTitle() + " is completed",
+					currentTask.getRecipient(), currentTask.getUserName(),
+					Consts.TASK_COMPLETED,
+					configM.GetValue(Consts.CONFIG_SMTPNAME),
+					Integer.parseInt(configM.GetValue(Consts.CONFIG_SMTPPORT)),
+					Boolean.parseBoolean(configM
+							.GetValue(Consts.CONFIG_ISAUTHLOGIN)));
+			SmtpToCreator.sendSmtpMessage();
+		}
+	}
 
 	public void updateTaskAsCompleted(int id) throws SQLException {
-				taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
+		taskDB.updateTask(Consts.TaskStatus.COMPLETED, (long) id);
 	}
 }
