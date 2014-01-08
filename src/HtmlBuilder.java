@@ -162,12 +162,14 @@ public class HtmlBuilder<T extends Job> {
 		builder.append(task.getStatusString());
 		builder.append("</td>");
 		builder.append("<td>");
+		if (task.getStatus() == Consts.TaskStatus.IN_PROGRESS) { 
 		builder.append("<form name=\"Delete\" method=\"GET\" action=\""
 				+ Consts.TASKS_PAGE + "\">");
 		builder.append("<input type=\"hidden\" name=\"id\" value=\""
 				+ task.getId() + "\" />");
 		builder.append("<input type=\"submit\" value=\"Delete\">");
 		builder.append("</form>");
+		}
 		builder.append("</td>");
 
 		return builder.toString();
@@ -228,9 +230,9 @@ public class HtmlBuilder<T extends Job> {
 		builder.append("content: <textarea cols=\"40\" rows=\"5\" name=\"" + Consts.CONTENT +
 				"\">"  + content);
 		builder.append("</textarea><br>");
-		builder.append("date: <input type=\"text\" name=\"" + Consts.REMINDING_DATE + "\" value=\"" + date+
+		builder.append("date(Format DD-MM-YYYY): <input type=\"text\" name=\"" + Consts.REMINDING_DATE + "\" value=\"" + date+
 				"\"><br>");
-		builder.append("time: <input type=\"text\" name=\"" + Consts.REMINDING_TIME + "\" value=\"" + time +
+		builder.append("time(Format HH:MM:SS.S): <input type=\"text\" name=\"" + Consts.REMINDING_TIME + "\" value=\"" + time +
 				"\"><br>");
 		builder.append("<input type=\"submit\" value=\"Save\">");
 		builder.append("</form>");
@@ -260,8 +262,8 @@ public class HtmlBuilder<T extends Job> {
 				"\">");
 		builder.append("</textarea><br>");
 		builder.append("recipient: <input type=\"text\" name=\"" + Consts.RECIPIENT + "\"><br>");
-		builder.append("date: <input type=\"text\" name=\"" + Consts.DUE_DATE + "\"><br>");
-		builder.append("time: <input type=\"text\" name=\"" + Consts.DUE_TIME + "\"><br>");
+		builder.append("date(Format DD-MM-YYYY): <input type=\"text\" name=\"" + Consts.DUE_DATE + "\"><br>");
+		builder.append("time(Format HH:MM:SS.S): <input type=\"text\" name=\"" + Consts.DUE_TIME + "\"><br>");
 		builder.append("<input type=\"submit\" value=\"Save\">");
 		builder.append("</form>");
 		builder.append("<form action=\"tasks.html\">"

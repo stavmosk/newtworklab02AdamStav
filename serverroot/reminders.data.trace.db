@@ -1,0 +1,81 @@
+01-08 17:05:15 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 17:28:23 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 17:49:18 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 17:57:56 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 18:14:40 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 18:34:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 18:52:36 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 18:55:28 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:00:15 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:01:24 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:02:44 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:03:54 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:08:04 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:10:07 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:23:48 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:24:57 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:27:28 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:31:52 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:34:10 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:37:42 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 19:40:39 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 20:01:45 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 21:41:17 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 21:43:09 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 21:46:32 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 21:58:34 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]
+01-08 22:00:44 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "REMINDERTABLE" already exists; SQL statement:
+create table ReminderTable(id int primary key auto_increment, user_name varchar(255), title varchar(255), content varchar(1000), status varchar(255), reminding_time datetime, creation_time datetime) [42101-174]

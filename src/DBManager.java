@@ -10,6 +10,7 @@ public class DBManager {
     public DBManager(String path) { 
     	this.path = path;
     }
+    
 
     protected void deleteById(long id, String tableName) throws SQLException {
         Statement statement = null;

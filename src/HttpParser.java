@@ -14,12 +14,6 @@ public class HttpParser {
 
 	private final static String CRLF = "\r\n";
 
-	/**
-	 * The possible Methods to handle.
-	 * 
-	 * @author stavmosk
-	 * 
-	 */
 	public enum Method {
 		HEAD, GET, POST, TRACE, OPTIONS
 	};
@@ -144,14 +138,9 @@ public class HttpParser {
 	}
 
 	private boolean seperateRequestToLines(String request) {
-		String[] requestAndBody = request.split(CRLF + CRLF); // separates the
-																// request part
-																// from
-																// the body part
-		headerRequestSeperatedToLines = requestAndBody[0].split(CRLF); // splits
-																		// the
-																		// request
-																		// to
+		String[] requestAndBody = request.split(CRLF + CRLF); 
+		headerRequestSeperatedToLines = requestAndBody[0].split(CRLF); 
+		
 		if (requestAndBody.length > 1) {
 			body = requestAndBody[1];
 		}

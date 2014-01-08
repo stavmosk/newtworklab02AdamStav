@@ -23,8 +23,8 @@ public class Consts {
 	
 	public static final String TASK_REPLY = "task_reply.html";
 	public static final String POLL_REPLY = "poll_reply.html";
-
-
+	
+	public static final String STARTING_SERVER = "Starting server";
 
 	public static final String REMINDERS_EDITOR = "reminder_editor.html";
 	public static final String TASK_EDITOR = "task_editor.html";
@@ -80,6 +80,9 @@ public class Consts {
 	
 	public static final String POLL_MAIL_ANSWER_LINE = "For %s Press - %s";
 	public static final String POLL_CURRENT_STATE = "The current answers state is - ";
+	
+	public static final String PORT_OUT_OF_RANGE = "Port number is out of range";
+	public static final String MAX_THREAD_OUT_OF_RANGE = "Max Threads is out of range";
 	
 	public static String replaceApostrophes(String toReplace) { 
 		String toReturn = toReplace.replace("'", "''");

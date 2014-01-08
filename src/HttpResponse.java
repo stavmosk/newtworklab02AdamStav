@@ -193,7 +193,8 @@ public class HttpResponse {
 			responseFile = new File(root + NOT_FOUND_PAGE);
 			break;
 		case FOUND:
-			addHeader("Location", path);
+			//addHeader("Location", path);
+			addHeader("Location", "http://" + configM.GetValue(Consts.CONFIG_SERVERNAME) + ":" + configM.GetValue(Consts.CONFIG_PORT) + path);
 			responseFile = null;
 			break;
 

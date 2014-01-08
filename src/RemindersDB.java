@@ -11,8 +11,7 @@ public class RemindersDB extends DBManager {
 	}
 
 	String getDbFile() {
-		// return "C:\\Users\\user\\Downloads\\reminder1.data";
-		return "C:\\Users\\user\\workspaceHTML\\newtworklab02AdamStav\\" + path;
+		return path;
 	}
 
 	public void createDb() throws Exception {
@@ -54,7 +53,6 @@ public class RemindersDB extends DBManager {
 
 			synchronized (lock) {
 
-				// Create new reminder
 				if (reminder.getId() < 1) {
 					statement
 							.execute(String
@@ -63,7 +61,7 @@ public class RemindersDB extends DBManager {
 											reminder.getUserName(),
 											Consts.replaceApostrophes(reminder.getTitle()),
 											Consts.replaceApostrophes(reminder.getContent()),
-											reminder.getStatusString(), // added this
+											reminder.getStatusString(), 
 											reminder.getDateRemindingString(),
 											Consts.DATE_FORMAT,
 											reminder.getCreationDateAndTimeString(),

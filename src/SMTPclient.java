@@ -39,20 +39,13 @@ public class SMTPclient {
 		this.smtpName = smtpName;
 		this.smtpPort = smtpPort;
 		this.authLogin = authLogin;
-
 	}
 
-	/**
-	 * 
-	 */
 	public void sendSmtpMessage() {
 		connectingToServer();
 		sendMessage();
 	}
 
-	/**
-	 * 
-	 */
 	private void connectingToServer() {
 		try {
 			smtpSocket = new Socket(smtpName, smtpPort);
@@ -67,19 +60,15 @@ public class SMTPclient {
 		}
 	}
 
-	/**
-	 * 
-	 * @return
-	 */
 	private boolean checkSmtpServerResponse() {
 		String responseLine;
 		try {
 			if ((responseLine = reader.readLine()) != null) {
+				System.out.println(responseLine);
 				if (responseLine.indexOf("OK") == -1 && responseLine.indexOf("220") == -1) {
 					System.err.println(responseLine);
 					return false;
 				}
-				System.out.println(responseLine);
 			} else {
 				System.err.println("Smtp server isnt responding");
 				return false;
@@ -93,16 +82,14 @@ public class SMTPclient {
 		return true;
 	}
 
-	/**
-	 * 
-	 */
 	private void sendMessage() {
 		if (smtpSocket != null && os != null && is != null) {
 			String encodeUserName = null;
 			String encodePassword = null;
 
 			try {
-
+				String currentLine = "";
+				
 				if (authLogin) {
 					os.writeBytes("EHLO stavMoskovich adamRozental" + CRLF);
 					if (!checkSmtpServerResponse()) {
@@ -112,49 +99,66 @@ public class SMTPclient {
 					System.out.println(reader.readLine());
 					System.out.println(reader.readLine());
 					
+					System.out.println("AUTH LOGIN" + CRLF);
 					os.writeBytes("AUTH LOGIN" + CRLF);
-					System.out.println(reader.readLine());
-					// //... 334
+					currentLine = reader.readLine();
+					System.out.println(currentLine);
+					if(currentLine.indexOf("334") == -1){
+						return;
+					}
+					
 					encodeUserName = DatatypeConverter.printBase64Binary(userName.getBytes());
 					encodePassword = DatatypeConverter.printBase64Binary(password.getBytes());
+					System.out.println(encodeUserName + CRLF);
 					os.writeBytes(encodeUserName + CRLF);
-					System.out.println(reader.readLine());
-					// /... 334
+					currentLine = reader.readLine();
+					System.out.println(currentLine);
+					if(currentLine.indexOf("334") == -1){
+						return;
+					}
+					System.out.println(encodePassword + CRLF);
 					os.writeBytes(encodePassword + CRLF);
-					System.out.println(reader.readLine());
-					// /.. 235
+					currentLine = reader.readLine();
+					System.out.println(currentLine);
+					if(currentLine.indexOf("235") == -1){
+						return;
+					}
 
 				} else {
-					// after helo what should be??????
+					System.out.println("HELO " + "tasker" + CRLF);
 					os.writeBytes("HELO " + "tasker" + CRLF);
 					if (!checkSmtpServerResponse()) {
 						return;
 					}
 				}
 
+				System.out.println("MAIL FROM: " + mailFrom + CRLF);
 				os.writeBytes("MAIL FROM: " + mailFrom + CRLF);
 				if (!checkSmtpServerResponse()) {
 					return;
 				}
+				System.out.println("RCPT TO: " + rcptTo + CRLF);
 				os.writeBytes("RCPT TO: " + rcptTo + CRLF);
 				if (!checkSmtpServerResponse()) {
 					return;
 				}
+				System.out.println("DATA" + CRLF);
 				os.writeBytes("DATA" + CRLF);
 				if (!checkSmtpServerResponse()) {
 					return;
 				}
 
 				// Message Data:
+				System.out.println("Subject: " + subject + CRLF + "From: " + fromName + CRLF + "Sender: " + mailFrom + CRLF + CRLF + messageData +CRLF + "." + CRLF);
 				os.writeBytes("Subject: " + subject + CRLF);
 				os.writeBytes("From: " + fromName + CRLF);
-				// check what should be written after the sender
 				os.writeBytes("Sender: " + mailFrom + CRLF);
 				os.writeBytes(CRLF);
 				os.writeBytes(messageData);
 				os.writeBytes(CRLF + "." + CRLF);
 
 				System.out.println(reader.readLine());
+				System.out.println("QUIT");
 				os.writeBytes("QUIT");
 				os.close();
 				is.close();

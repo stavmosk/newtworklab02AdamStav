@@ -33,8 +33,6 @@ public class Poll extends Job {
 		this.recipients = new LinkedList<String>();
 		this.answers = new LinkedList<String>();
 		this.recipientsReplies = new HashMap<String, String>();
-		//setRecipients(recipent);
-		//setAnswers(answers);
 		setRecipients(replaceSpaceWithCRLF(recipent));
 		setAnswers(replaceSpaceWithCRLF(answers));
 		setRecipientsReplies(recipientsReplies);
@@ -57,12 +55,10 @@ public class Poll extends Job {
 			ListIterator<String> itr = recipients.listIterator();
 			while (itr.hasNext()) {
 				builder.append(itr.next() + " ");
-				//builder.append(itr.next() + Consts.CRLF);
 			}
 
 			// Removes the last space.
 			builder.deleteCharAt(builder.length() - 1);
-			//builder.deleteCharAt(builder.length() - 2);
 			return builder.toString();
 		}
 		return "";
@@ -90,12 +86,10 @@ public class Poll extends Job {
 			ListIterator<String> itr = answers.listIterator();
 			while (itr.hasNext()) {
 				builder.append(itr.next() + " ");
-				//builder.append(itr.next() + Consts.CRLF);
 			}
 
 			// Removes the last space.
 			builder.deleteCharAt(builder.length() - 1);
-			//builder.deleteCharAt(builder.length() - 2);
 			return builder.toString();
 		}
 		return "";

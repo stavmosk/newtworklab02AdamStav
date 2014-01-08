@@ -79,8 +79,6 @@ public class JobTimerTask extends TimerTask {
 					System.err
 							.println("Error updating a task as over due time");
 				}
-				// Update the table as over the time
-				// I need jobs to have their database
 			}
 			}
 		}

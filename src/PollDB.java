@@ -11,8 +11,7 @@ public class PollDB extends DBManager {
 	}
 
 	String getDbFile() {
-		//return "C:\\Users\\stavmosk\\Downloads\\poll3.data";
-		return "C:\\Users\\user\\workspaceHTML\\newtworklab02AdamStav\\"+ path;
+		return path;
 	}
 
 	public void createDb() throws Exception {
